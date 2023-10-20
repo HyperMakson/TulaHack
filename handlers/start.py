@@ -19,15 +19,19 @@ async def cmd_start(message: Message):
 @router.callback_query(F.data == "appointment")
 async def start_appointment(callback: CallbackQuery):
     await callback.message.answer("Это запись")
+    await callback.answer()
 
 @router.callback_query(F.data == "my_notes")
 async def start_appointment(callback: CallbackQuery):
     await callback.message.answer("Это мои записи")
+    await callback.answer()
 
 @router.callback_query(F.data == "my_tests")
 async def start_appointment(callback: CallbackQuery):
     await callback.message.answer("Это мои анализы")
+    await callback.answer()
 
 @router.callback_query(F.data == "symptoms")
 async def start_appointment(callback: CallbackQuery):
     await callback.message.answer("Это симптомы")
+    await callback.answer()
