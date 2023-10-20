@@ -61,7 +61,7 @@ async def specialist_chosen_incorrectly(message: Message):
 @router.message(Clinic.date, F.text.in_(date_arr))
 async def date_chosen(message: Message, state: FSMContext):
     await state.update_data(chosen_date=message.text.lower())
-    await message.answer(text="Хорошо. Введите свои данные (ФИО, СНИЛС, Полис).", reply_markup=ReplyKeyboardRemove())
+    await message.answer(text="Хорошо. Введите ФИО полностью.", reply_markup=ReplyKeyboardRemove())
     await state.set_state(Clinic.user_fio)
 
 @router.message(Clinic.date)
@@ -71,13 +71,13 @@ async def date_chosen_incorrectly(message: Message):
 @router.message(Clinic.user_fio)
 async def FIO_chosen(message: Message, state: FSMContext):
     await state.update_data(chosen_fio=message.text.lower())
-    await message.answer(text="Хорошо. Введите ФИО полностью.")
+    await message.answer(text="Хорошо. Введите ваш СНИЛС.")
     await state.set_state(Clinic.user_snils)
 
 @router.message(Clinic.user_snils)
 async def snils_chosen(message: Message, state: FSMContext):
     await state.update_data(chosen_snils=message.text.lower())
-    await message.answer(text="Хорошо. Введите ваш СНИЛС.")
+    await message.answer(text="Хорошо. Введите ваш Полис.")
     await state.set_state(Clinic.user_polis)
 
 @router.message(Clinic.user_polis)
