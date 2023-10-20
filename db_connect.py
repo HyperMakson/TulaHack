@@ -2,7 +2,7 @@
 import sqlite3 as sq
 def sql_start():
     global base, cur
-    base = sq.connect('baza.db')
+    base = sq.connect('baza1.db')
     cur = base.cursor()
     if base:
         print("БД подключена успешно")
