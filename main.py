@@ -1,1 +1,2 @@
-print("ffadawdwaf")
+print("ffawaf")
+print("fdggd")
