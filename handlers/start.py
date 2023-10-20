@@ -77,7 +77,7 @@ async def FIO_chosen(message: Message, state: FSMContext):
 @router.message(Clinic.user_snils)
 async def snils_chosen(message: Message, state: FSMContext):
     await state.update_data(chosen_snils=message.text.lower())
-    await message.answer(text="Хорошо. Введите ваш Полис.")
+    await message.answer(text="Хорошо. Введите ваш номер Полиса.")
     await state.set_state(Clinic.user_polis)
 
 @router.message(Clinic.user_polis)
@@ -89,9 +89,9 @@ async def polis_chosen(message: Message, state: FSMContext):
             f"Специалист: {user_data['chosen_specialist']}\n"
             f"Дата и время: {user_data['chosen_date']}\n"
             f"Данные пользователя:\n"
-            f"ФИО: {user_data['chosen_fio']}"
-            f"СНИЛС: {user_data['chosen_snils']}"
-            f"Полис: {user_data['chosen_polis']}"
+            f"ФИО: {user_data['chosen_fio']}\n"
+            f"СНИЛС: {user_data['chosen_snils']}\n"
+            f"Полис: {user_data['chosen_polis']}\n"
     )
     await state.clear()
 
