@@ -1,1 +1,1 @@
-print("FuckApp")
+print("fff")
