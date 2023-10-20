@@ -1,6 +1,6 @@
 from aiogram import Router, F
 from aiogram.filters.command import Command
-from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
+from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, ReplyKeyboardRemove
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
@@ -12,7 +12,9 @@ class Clinic(StatesGroup):
     specialization = State()
     specialist = State()
     date = State()
-    user = State()
+    user_fio = State()
+    user_snils = State()
+    user_polis = State()
 
 specialization_arr = ["Терапевт", "Уролог", "Стоматолог", "Офтальмолог"]
 specialist_arr = ["Сорокин", "Цыбуля", "Генералов", "Митяев", "Данилов"]
@@ -59,12 +61,40 @@ async def specialist_chosen_incorrectly(message: Message):
 @router.message(Clinic.date, F.text.in_(date_arr))
 async def date_chosen(message: Message, state: FSMContext):
     await state.update_data(chosen_date=message.text.lower())
-    await message.answer(text="Хорошо. Введите свои данные (ФИО, СНИЛС, Полис).")
-    await state.set_state(Clinic.user)
+    await message.answer(text="Хорошо. Введите свои данные (ФИО, СНИЛС, Полис).", reply_markup=ReplyKeyboardRemove())
+    await state.set_state(Clinic.user_fio)
 
 @router.message(Clinic.date)
 async def date_chosen_incorrectly(message: Message):
     await message.answer(text="Такой даты нет\nПожалуйста, выберите свободную дату")
+
+@router.message(Clinic.user_fio)
+async def FIO_chosen(message: Message, state: FSMContext):
+    await state.update_data(chosen_fio=message.text.lower())
+    await message.answer(text="Хорошо. Введите ФИО полностью.")
+    await state.set_state(Clinic.user_snils)
+
+@router.message(Clinic.user_snils)
+async def snils_chosen(message: Message, state: FSMContext):
+    await state.update_data(chosen_snils=message.text.lower())
+    await message.answer(text="Хорошо. Введите ваш СНИЛС.")
+    await state.set_state(Clinic.user_polis)
+
+@router.message(Clinic.user_polis)
+async def polis_chosen(message: Message, state: FSMContext):
+    await state.update_data(chosen_polis=message.text.lower())
+    user_data = await state.get_data()
+    await message.answer(
+        text=f"Специализация: {user_data['chosen_specialization']}\n"
+            f"Специалист: {user_data['chosen_specialist']}\n"
+            f"Дата и время: {user_data['chosen_date']}\n"
+            f"Данные пользователя:\n"
+            f"ФИО: {user_data['chosen_fio']}"
+            f"СНИЛС: {user_data['chosen_snils']}"
+            f"Полис: {user_data['chosen_polis']}"
+    )
+    await state.clear()
+
 
 
 
