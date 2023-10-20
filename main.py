@@ -1,1 +1,1 @@
-print("ffadawdwadadaf")
+print("ffadawdwaf")
