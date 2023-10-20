@@ -16,6 +16,8 @@ class Clinic(StatesGroup):
 
 specialization_arr = ["Терапевт", "Уролог", "Стоматолог", "Офтальмолог"]
 specialist_arr = ["Сорокин", "Цыбуля", "Генералов", "Митяев", "Данилов"]
+date_arr = ["18:00", "18:30", "19:00"]
+
 
 @router.message(Command("start"))
 async def cmd_start(message: Message):
@@ -39,6 +41,34 @@ async def specialization_chosen(message: Message, state: FSMContext):
     await state.update_data(chosen_specialization=message.text.lower())
     await message.answer(text="Хорошо. Выберете конкретного врача.", reply_markup=make_row_keyboard(specialist_arr))
     await state.set_state(Clinic.specialist)
+
+@router.message(Clinic.specialization)
+async def specialization_chosen_incorrectly(message: Message):
+    await message.answer(text="Я не знаю такой специальности\nПожалуйста, напишите другую специальность", reply_markup=make_row_keyboard(specialization_arr))
+
+@router.message(Clinic.specialist, F.text.in_(specialist_arr))
+async def specialist_chosen(message: Message, state: FSMContext):
+    await state.update_data(chosen_specialist=message.text.lower())
+    await message.answer(text="Хорошо. Выберете свободную дату и время.", reply_markup=make_row_keyboard(date_arr))
+    await state.set_state(Clinic.date)
+
+@router.message(Clinic.specialist)
+async def specialist_chosen_incorrectly(message: Message):
+    await message.answer(text="Я не знаю такого специалиста\nПожалуйста, напишите другого специалиста", reply_markup=make_row_keyboard(specialist_arr))
+
+@router.message(Clinic.date, F.text.in_(date_arr))
+async def date_chosen(message: Message, state: FSMContext):
+    await state.update_data(chosen_date=message.text.lower())
+    await message.answer(text="Хорошо. Введите свои данные (ФИО, СНИЛС, Полис).")
+    await state.set_state(Clinic.user)
+
+@router.message(Clinic.date)
+async def date_chosen_incorrectly(message: Message):
+    await message.answer(text="Такой даты нет\nПожалуйста, выберите свободную дату")
+
+
+
+
 
 @router.callback_query(F.data == "my_notes")
 async def start_appointment(callback: CallbackQuery):
