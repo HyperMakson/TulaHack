@@ -6,7 +6,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from keyboards.simple_keyboard import make_row_keyboard
 from db_connect import dbworker
-
+import pandas as pd
+from datetime import datetime
 '''Подключение к базе данных'''
 
 db = dbworker('baza.db')
@@ -22,15 +23,22 @@ class Clinic(StatesGroup):
     user_fio = State()
     user_snils = State()
     user_polis = State()
-
     input_symptoms = State()
+
+'''Получаем следующие 9 будних дней'''
+
+dateList = pd.bdate_range(start = datetime.today(), periods = 9).to_pydatetime().tolist()
+date_arr =[]
+for date in dateList:
+    date_arr.append(date.strftime("%d.%m"))
+
 
 '''Списки значений кнопок'''
 
+
+
 specialization_arr = ["Венеролог", "Вирусолог", "Гинеколог", "Дерматолог", "Терапевт", "Диетолог", "Акушер", "Кардиолог", "Нарколог", "Педиатр", "Хирург", "Лор"]
-#specialist_arr = db.get_all_docs()
-specialist_arr = ["Цыбуля", "Сорокин", "Митяев", "Генералов", "Данилов"]
-date_arr = ["21.10", "22.10", "23.10", "24.10", "25.10", "26.10", "27.10"]
+specialist_arr = db.get_all_docs()
 time_arr = ["07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00",
             "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30","15:00",
             "15:30", "16:00", "16:30", "17:00"]
@@ -81,8 +89,16 @@ async def specialist_chosen_incorrectly(message: Message):
 @router.message(Clinic.date, F.text.in_(date_arr))
 async def date_chosen(message: Message, state: FSMContext):
     await state.update_data(chosen_date=message.text.lower())
-    await message.answer(text="Хорошо. Выберете свободное время.", reply_markup=make_row_keyboard(time_arr))
-    await state.set_state(Clinic.time)
+    user_data = await state.get_data()
+    busy_time_arr = db.get_time_date(user_data['chosen_date'])
+    '''Получение  свободного времени'''
+    free_time_arr = [x for x in time_arr if x not in busy_time_arr]
+    '''Проверка если свободного времени нет'''
+    if free_time_arr == []:
+        await message.answer(text="На эту дату нет сводного времени\nПожалуйста, выберите свободную дату", reply_markup=make_row_keyboard(date_arr))
+    else:
+        await message.answer(text="Хорошо. Выберете свободное время.", reply_markup=make_row_keyboard(free_time_arr))
+        await state.set_state(Clinic.time)
 
 @router.message(Clinic.date)
 async def date_chosen_incorrectly(message: Message):
