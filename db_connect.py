@@ -16,23 +16,52 @@ class dbworker:
     def add_appoint(self, doc_fio, user_id, date, time):
         '''Добавление записи к врачу'''
         with self.connection:
-            doc_id = self.cursor.execute('SELECT * FROM `Docs` WHERE `Doc_fio` = ?', (doc_fio,))
+            res = self.cursor.execute('SELECT `Doc_id` FROM `Docs` WHERE `Doc_fio` = ?', (doc_fio,)).fetchone()
+            doc_id = res[0]
             return self.cursor.execute('INSERT INTO `Appoints` (`Doc_id`, `User_id`, `Date`, `Time`, `Tests`) VALUES(?,?,?,?,?)', (doc_id, user_id, date, time, 'expected'))
     def del_appoint(self, user_id, date, time):
         '''Удаление записи к врачу'''
         with self.connection:
-            return self.cursor.execute('DELETE FROM `Appoints` WHERE `User_id` = ? AND `Date` = ? AND `Time` = ?',(user_id, date, time,))
+            return self.cursor.execute('DELETE FROM `Appoints` WHERE `User_id` = ? AND `Date` = ? AND `Time` = ?', (user_id, date, time,))
     def get_all_appoints_user(self, user_id):
-        '''Вывод всех записей пользователя'''
+        '''Вывод всех записей пользователя '''
         with self.connection:
-            return self.cursor.execute('SELECT * FROM `Appoints` WHERE `User_id` = ?', (user_id,)).fetchall()
+            res = self.cursor.execute('SELECT * FROM `Appoints` WHERE `User_id` = ?', (user_id,)).fetchall()
+            arr = []
+            arr1 = []
+            for row in res:
+                arr.append(row[0])
+                arr.append(row[1])
+                arr.append(row[2])
+                arr.append(row[3])
+                arr.append(row[4])
+                arr1.append(arr)
+                arr = []
+        return arr1
     def get_all_docs(self):
         '''Вывод всех врачей'''
         with self.connection:
-            return self.cursor.execute('SELECT `Doc_fio` FROM `Docs`').fetchall()
-        
-            
-        
+            res = self.cursor.execute('SELECT `Doc_fio` FROM `Docs`').fetchall()
+            arr = []
+            for row in res:
+                arr.append(row[0])
+            return arr
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         
         
         
