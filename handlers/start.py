@@ -71,10 +71,8 @@ async def start_appointment(callback: CallbackQuery, state: FSMContext):
 async def specialization_chosen(message: Message, state: FSMContext):
     await state.update_data(chosen_specialization=message.text.lower())
     user_data = await state.get_data()
-    print(user_data['chosen_specialization'])
     global specialist_arr
     specialist_arr = db.get_all_docs(user_data['chosen_specialization'])
-    print(specialist_arr)
     await message.answer(text="Хорошо. Выберете конкретного врача.", reply_markup=make_row_keyboard(specialist_arr))
     await state.set_state(Clinic.specialist)
 
