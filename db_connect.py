@@ -34,11 +34,14 @@ class dbworker:
             print(res)
             arr = []
             arr1 = []
+            i = 0
             for row in res:
-                arr.append(row[0])
-                arr.append(row[1])
-                arr.append(row[2])
-                arr.append(row[3])
+                i += 1
+                arr.append(f"Запись №{i}")
+                arr.append(f"Специализация: {row[0]}")
+                arr.append(f"Специалист: {row[1]}")
+                arr.append(f"Дата: {row[2]}")
+                arr.append(f"Время: {row[3]}")
                 arr1.append(arr)
                 arr = []
             print(arr1)

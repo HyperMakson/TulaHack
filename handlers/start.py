@@ -184,7 +184,6 @@ async def polis_chosen(message: Message, state: FSMContext):
 async def start_appointment(callback: CallbackQuery):
     notes_user = db.get_all_appoints_user(callback.from_user.id)
     for i in range(len(notes_user)):
-        print(notes_user[i])
         notes_user_arr = [str(x) for x in notes_user[i]]
         notes_user_join = '\n'.join(notes_user_arr)
         await callback.message.answer(notes_user_join)
