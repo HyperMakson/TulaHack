@@ -49,8 +49,9 @@ class dbworker:
                 arr.append(row[0])
             return arr
     def get_user(self, user_id):
+        '''Получение данных о пользователе'''
         with self.connection:
-            res = self.cursor.execute('SELECT `User_fio`, `Snils`, `Polis` FROM `Users`').fetchone()
+            res = self.cursor.execute('SELECT `User_fio`, `Snils`, `Polis` FROM `Users` WHERE `User_id` = ?', (user_id,)).fetchone()
             user_fio = res[0]
             snils = res[1]
             polis = res[2]
