@@ -60,6 +60,17 @@ async def cmd_start(message: Message):
         reply_markup=start_row_keyboard()
     )
 
+@router.message(Command("cancel"))
+@router.message(F.text.lower() == "отмена")
+async def cmd_cancel(message: Message, state: FSMContext):
+    await state.clear()
+    await message.answer(text="Действие отменено", reply_markup=ReplyKeyboardRemove())
+    await message.answer(
+        text="Здравствуйте! Вас приветствует клиника AmNyam\n"
+            "Вы можете выбрать одно из действий, представленных ниже",
+        reply_markup=start_row_keyboard()
+    )
+
 '''Заполнение записи к врачу'''
 @router.callback_query(F.data == "appointment")
 async def start_appointment(callback: CallbackQuery, state: FSMContext):
@@ -343,13 +354,3 @@ async def polis_chosen(message: Message, state: FSMContext):
 
 
 
-@router.message(Command("cancel"))
-@router.message(F.text.lower() == "отмена")
-async def cmd_cancel(message: Message, state: FSMContext):
-    await state.clear()
-    await message.answer(text="Действие отменено", reply_markup=ReplyKeyboardRemove())
-    await message.answer(
-        text="Здравствуйте! Вас приветствует клиника AmNyam\n"
-            "Вы можете выбрать одно из действий, представленных ниже",
-        reply_markup=start_row_keyboard()
-    )
