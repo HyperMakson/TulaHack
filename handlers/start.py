@@ -181,13 +181,21 @@ async def symptoms_chosen(message: Message, state: FSMContext):
     symptoms_split = str(symptoms).split()
     exist_sympton = db.select_symptom()
     symptom_finden = []
+    id_finden = []
     print(exist_sympton)
     for i in symptoms_split:
-        if i in exist_sympton:
-            symptom_finden.append(i)
+        i_srez = i[0:-1]
+        print(i_srez)
+        if i_srez in exist_sympton:
+            symptom_finden.append(i_srez)
+            id_find = db.select_id(i_srez)
+            id_finden.append(id_find[0])
             print("ff")
-    for i in symptom_finden:
-        specialist_for_symptom = db.find_specialist_for_symptom(i)
+    print(id_finden)
+    print(symptom_finden)
+    for i in id_finden:
+        specialist_for_symptom = db.find_specialist_for_symptom(int(i))
+        print(specialist_for_symptom)
     await state.clear()
 
 
