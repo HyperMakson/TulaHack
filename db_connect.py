@@ -25,7 +25,7 @@ class dbworker:
         with self.connection:
             return self.cursor.execute('DELETE FROM `Appoints` WHERE `User_id` = ? AND `Date` = ? AND `Time` = ?', (user_id, date, time,))
     def get_all_appoints_user(self, user_id):
-        '''Вывод всех записей пользователя'''
+        '''Вывод всех записей пользователя '''
         with self.connection:
             res = self.cursor.execute('SELECT * FROM `Appoints` WHERE `User_id` = ?', (user_id,)).fetchall()
             arr = []
