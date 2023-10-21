@@ -222,6 +222,90 @@ async def specialization_chosen(message: Message, state: FSMContext):
 async def specialization_chosen_incorrectly(message: Message):
     await message.answer(text="Я не знаю такой специальности\nПожалуйста, напишите другую специальность", reply_markup=make_row_keyboard(specialization_arr))
 
+@router.message(Clinic.input_specialist, F.text.in_(specialist_arr))
+async def specialist_chosen(message: Message, state: FSMContext):
+    await state.update_data(chosen_specialist=message.text.lower())
+    await message.answer(text="Хорошо. Выберете свободную дату.", reply_markup=make_row_keyboard(date_arr))
+    await state.set_state(Clinic.input_date)
+
+@router.message(Clinic.input_specialist)
+async def specialist_chosen_incorrectly(message: Message):
+    await message.answer(text="Я не знаю такого специалиста\nПожалуйста, напишите другого специалиста", reply_markup=make_row_keyboard(specialist_arr))
+
+@router.message(Clinic.input_date, F.text.in_(date_arr))
+async def date_chosen(message: Message, state: FSMContext):
+    await state.update_data(chosen_date=message.text.lower())
+    user_data = await state.get_data()
+    busy_time_arr = db.get_time_date(user_data['chosen_date'])
+    '''Получение  свободного времени'''
+    free_time_arr = [x for x in time_arr if x not in busy_time_arr]
+    '''Проверка если свободного времени нет'''
+    if free_time_arr == []:
+        await message.answer(text="На эту дату нет сводного времени\nПожалуйста, выберите свободную дату", reply_markup=make_row_keyboard(date_arr))
+    else:
+        await message.answer(text="Хорошо. Выберете свободное время.", reply_markup=make_row_keyboard(free_time_arr))
+        await state.set_state(Clinic.time)
+
+@router.message(Clinic.date)
+async def date_chosen_incorrectly(message: Message):
+    await message.answer(text="Такой даты нет\nПожалуйста, выберите свободную дату", reply_markup=make_row_keyboard(date_arr))
+
+@router.message(Clinic.time, F.text.in_(time_arr))
+async def time_chosen(message: Message, state: FSMContext):
+    await state.update_data(chosen_time=message.text.lower())
+    if db.user_exists(message.from_user.id) == False:
+       '''Проверка на наличие пользователя в базе данных'''
+       await message.answer(text="Хорошо. Введите ФИО полностью.", reply_markup=ReplyKeyboardRemove())
+       await state.set_state(Clinic.user_fio)
+    else:
+        user_data = await state.get_data()
+        '''Получение данных о пользователе из базы данных'''
+        date_user = db.get_user(message.from_user.id)
+        await message.answer(
+        text=f"Специализация: {user_data['chosen_specialization']}\n"
+            f"Специалист: {user_data['chosen_specialist']}\n"
+            f"Дата: {user_data['chosen_date']}\n"
+            f"Время: {user_data['chosen_time']}\n"
+            f"Данные пользователя:\n"
+            f"ФИО: {date_user[0]}\n"
+            f"СНИЛС: {date_user[1]}\n"
+            f"Полис: {date_user[2]}\n", reply_markup=ReplyKeyboardRemove())
+        await state.clear()       
+@router.message(Clinic.time)
+async def time_chosen_incorrectly(message: Message):
+    await message.answer(text="Такого времени нет\nПожалуйста, выберите свободное время", reply_markup=make_row_keyboard(time_arr))
+
+@router.message(Clinic.user_fio)
+async def FIO_chosen(message: Message, state: FSMContext):
+    await state.update_data(chosen_fio=message.text.lower())
+    await message.answer(text="Хорошо. Введите ваш СНИЛС.")
+    await state.set_state(Clinic.user_snils)
+
+@router.message(Clinic.user_snils)
+async def snils_chosen(message: Message, state: FSMContext):
+    await state.update_data(chosen_snils=message.text.lower())
+    await message.answer(text="Хорошо. Введите ваш номер Полиса.")
+    await state.set_state(Clinic.user_polis)
+
+@router.message(Clinic.user_polis)
+async def polis_chosen(message: Message, state: FSMContext):
+    await state.update_data(chosen_polis=message.text.lower())
+    user_data = await state.get_data()
+    print(user_data['chosen_specialist'])
+    await message.answer(
+        text=f"Специализация: {user_data['chosen_specialization']}\n"
+            f"Специалист: {user_data['chosen_specialist']}\n"
+            f"Дата: {user_data['chosen_date']}\n"
+            f"Время: {user_data['chosen_time']}\n"
+            f"Данные пользователя:\n"
+            f"ФИО: {user_data['chosen_fio']}\n"
+            f"СНИЛС: {user_data['chosen_snils']}\n"
+            f"Полис: {user_data['chosen_polis']}\n"
+    )
+    db.add_appoint(user_data['chosen_specialist'], message.from_user.id, user_data['chosen_date'], user_data['chosen_time'])
+    db.add_user(message.from_user.id, user_data['chosen_fio'], user_data['chosen_snils'], user_data['chosen_polis'])
+    await state.clear()
+
 
 
 

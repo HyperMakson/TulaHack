@@ -1,6 +1,5 @@
 import sqlite3 
 
-
 class dbworker:
     def __init__(self, database_file):
         self.connection = sqlite3.connect(database_file)
@@ -57,6 +56,33 @@ class dbworker:
             snils = res[1]
             polis = res[2]
         return user_fio, snils, polis
+    
+    def select_symptom(self):
+        '''Получение всех симптомов'''
+        with self.connection:
+            res = self.cursor.execute('SELECT `Symptom` FROM `Symptoms`').fetchall()
+            arr = []
+            for row in res:
+                arr.append(row[0])
+            return arr
+    
+    def select_id(self, symp):
+        '''Получение всех симптомов'''
+        with self.connection:
+            res = self.cursor.execute('SELECT `Spec_id` FROM `Symptoms` WHERE `Symptom` = ?', (symp,)).fetchall()
+            arr = []
+            for row in res:
+                arr.append(row[0])
+            return arr
+    
+    def find_specialist_for_symptom(self, id_sympt):
+        '''Получение всех симптомов'''
+        with self.connection:
+            res = self.cursor.execute('SELECT `Spec_name` FROM `Specs` WHERE `Spec_id` = ?', (id_sympt,)).fetchall()
+            arr = []
+            for row in res:
+                arr.append(row[0])
+            return arr
 
 
 
