@@ -17,14 +17,11 @@ class dbworker:
     def add_appoint(self, doc_fio, user_id, date, time):
         '''Добавление записи к врачу'''
         with self.connection:
-            print(doc_fio)
             res = self.cursor.execute('SELECT `Doc_id` FROM `Docs` WHERE `Doc_fio` = ?', (doc_fio,)).fetchall()
-            print(res)
             arr = []
             for row in res:
                 arr.append(row[0])
             doc_id = arr[0]
-            print(doc_id)
             return self.cursor.execute('INSERT INTO `Appoints` (`Doc_id`, `User_id`, `Date`, `Time`, `Tests`) VALUES(?,?,?,?,?)', (doc_id, user_id, date, time, 'expected'))
     def del_appoint(self, user_id, date, time):
         '''Удаление записи к врачу'''
