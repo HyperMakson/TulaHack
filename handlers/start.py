@@ -179,10 +179,15 @@ async def symptoms_chosen(message: Message, state: FSMContext):
     symptoms_data = await state.get_data()
     symptoms = symptoms_data['chosen_symptoms']
     symptoms_split = str(symptoms).split()
+    exist_sympton = db.select_symptom()
+    symptom_finden = []
+    print(exist_sympton)
     for i in symptoms_split:
-        if i == dict_symptoms['Венеролог']:
+        if i in exist_sympton:
+            symptom_finden.append(i)
             print("ff")
-    print(symptoms)
+    for i in symptom_finden:
+        specialist_for_symptom = db.find_specialist_for_symptom(i)
     await state.clear()
 
 

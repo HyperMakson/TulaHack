@@ -56,6 +56,16 @@ class dbworker:
             snils = res[1]
             polis = res[2]
         return user_fio, snils, polis
+    
+    def select_symptom(self):
+        '''Получение всех симптомов'''
+        with self.connection:
+            return self.cursor.execute('SELECT `Symptom` FROM `Symptoms`').fetchall()
+    
+    def find_specialist_for_symptom(self, sympt):
+        '''Получение всех симптомов'''
+        with self.connection:
+            return self.cursor.execute('SELECT `Symptom` FROM `Symptoms`').fetchall()
 
 
 
