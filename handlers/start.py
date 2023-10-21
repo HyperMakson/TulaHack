@@ -8,6 +8,7 @@ from keyboards.simple_keyboard import make_row_keyboard
 from db_connect import dbworker
 
 '''Подключение к базе данных'''
+
 db = dbworker('baza.db')
 
 router = Router()
@@ -25,6 +26,7 @@ class Clinic(StatesGroup):
     input_symptoms = State()
 
 '''Списки значений кнопок'''
+
 specialization_arr = ["Венеролог", "Вирусолог", "Гинеколог", "Дерматолог", "Терапевт", "Диетолог", "Акушер", "Кардиолог", "Нарколог", "Педиатр", "Хирург", "Лор"]
 #specialist_arr = db.get_all_docs()
 specialist_arr = ["Цыбуля", "Сорокин", "Митяев", "Генералов", "Данилов"]
@@ -90,11 +92,12 @@ async def date_chosen_incorrectly(message: Message):
 async def time_chosen(message: Message, state: FSMContext):
     await state.update_data(chosen_time=message.text.lower())
     if db.user_exists(message.from_user.id) == False:
+       '''Проверка на наличие пользователя в базе данных'''
        await message.answer(text="Хорошо. Введите ФИО полностью.", reply_markup=ReplyKeyboardRemove())
        await state.set_state(Clinic.user_fio)
     else:
-        
         user_data = await state.get_data()
+        '''Получение данных о пользователе из базы данных'''
         date_user = db.get_user(message.from_user.id)
         await message.answer(
         text=f"Специализация: {user_data['chosen_specialization']}\n"
@@ -148,6 +151,7 @@ async def polis_chosen(message: Message, state: FSMContext):
 async def start_appointment(callback: CallbackQuery):
     await callback.message.answer("Вот ваши записи")
     await callback.answer()
+
 
 
 
