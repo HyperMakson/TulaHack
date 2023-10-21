@@ -41,7 +41,7 @@ class dbworker:
                 arr1.append(arr)
                 arr = []
         return arr1
-    def get_all_docs(self):
+    def get_all_docs(self, spec_name):
         
         '''Получение всех врачей заданых по заданной специальности'''
         
