@@ -244,13 +244,13 @@ async def date_chosen(message: Message, state: FSMContext):
         await message.answer(text="На эту дату нет сводного времени\nПожалуйста, выберите свободную дату", reply_markup=make_row_keyboard(date_arr))
     else:
         await message.answer(text="Хорошо. Выберете свободное время.", reply_markup=make_row_keyboard(free_time_arr))
-        await state.set_state(Clinic.time)
+        await state.set_state(Clinic.input_time)
 
-@router.message(Clinic.date)
+@router.message(Clinic.input_date)
 async def date_chosen_incorrectly(message: Message):
     await message.answer(text="Такой даты нет\nПожалуйста, выберите свободную дату", reply_markup=make_row_keyboard(date_arr))
 
-@router.message(Clinic.time, F.text.in_(time_arr))
+@router.message(Clinic.input_time, F.text.in_(time_arr))
 async def time_chosen(message: Message, state: FSMContext):
     await state.update_data(chosen_time=message.text.lower())
     if db.user_exists(message.from_user.id) == False:
@@ -270,24 +270,25 @@ async def time_chosen(message: Message, state: FSMContext):
             f"ФИО: {date_user[0]}\n"
             f"СНИЛС: {date_user[1]}\n"
             f"Полис: {date_user[2]}\n", reply_markup=ReplyKeyboardRemove())
-        await state.clear()       
-@router.message(Clinic.time)
+        await state.clear()
+     
+@router.message(Clinic.input_time)
 async def time_chosen_incorrectly(message: Message):
     await message.answer(text="Такого времени нет\nПожалуйста, выберите свободное время", reply_markup=make_row_keyboard(time_arr))
 
-@router.message(Clinic.user_fio)
+@router.message(Clinic.input_user_fio)
 async def FIO_chosen(message: Message, state: FSMContext):
     await state.update_data(chosen_fio=message.text.lower())
     await message.answer(text="Хорошо. Введите ваш СНИЛС.")
     await state.set_state(Clinic.user_snils)
 
-@router.message(Clinic.user_snils)
+@router.message(Clinic.input_user_snils)
 async def snils_chosen(message: Message, state: FSMContext):
     await state.update_data(chosen_snils=message.text.lower())
     await message.answer(text="Хорошо. Введите ваш номер Полиса.")
     await state.set_state(Clinic.user_polis)
 
-@router.message(Clinic.user_polis)
+@router.message(Clinic.input_user_polis)
 async def polis_chosen(message: Message, state: FSMContext):
     await state.update_data(chosen_polis=message.text.lower())
     user_data = await state.get_data()
