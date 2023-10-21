@@ -5,6 +5,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from keyboards.simple_keyboard import make_row_keyboard
+from keyboards.start_keyboard import start_row_keyboard
 from db_connect import dbworker
 
 '''Подключение к базе данных'''
@@ -24,6 +25,13 @@ class Clinic(StatesGroup):
     user_polis = State()
 
     input_symptoms = State()
+    input_specialization = State()
+    input_specialist = State()
+    input_date = State()
+    input_time = State()
+    input_user_fio = State()
+    input_user_snils = State()
+    input_user_polis = State()
 
 '''Списки значений кнопок'''
 
@@ -35,21 +43,14 @@ time_arr = ["07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:0
             "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30","15:00",
             "15:30", "16:00", "16:30", "17:00"]
 
-dict_symptoms = {
-    "Венеролог": "gfh"
-}
-
 '''Начальное меню бота'''
 @router.message(Command("start"))
 async def cmd_start(message: Message):
-    buttons = [
-        [InlineKeyboardButton(text="Запись на приём", callback_data="appointment")],
-        [InlineKeyboardButton(text="Мои записи", callback_data="my_notes")],
-        [InlineKeyboardButton(text="Мои анализы", callback_data="my_tests")],
-        [InlineKeyboardButton(text="Симптомы", callback_data="symptoms")]
-    ]
-    keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
-    await message.answer("Здравствуйте! Вы попали", reply_markup=keyboard)
+    await message.answer(
+        text="Здравствуйте! Вас приветствует клиника AmNyam\n"
+            "Вы можете выбрать одно из действий, представленных ниже",
+        reply_markup=start_row_keyboard()
+    )
 
 '''Заполнение записи к врачу'''
 @router.callback_query(F.data == "appointment")
@@ -183,24 +184,27 @@ async def symptoms_chosen(message: Message, state: FSMContext):
     symptom_finden = []
     id_finden = []
     specialist_finden = []
-    print(exist_sympton)
     for i in symptoms_split:
         i_srez = i[0:-1]
-        print(i_srez)
         if i_srez in exist_sympton:
             symptom_finden.append(i_srez)
             id_find = db.select_id(i_srez)
             id_finden.append(id_find[0])
-            print("ff")
-    print(id_finden)
-    print(symptom_finden)
     for i in id_finden:
         specialist_for_symptom = db.find_specialist_for_symptom(int(i))
         specialist_finden.append(specialist_for_symptom[0])
-        print(specialist_for_symptom)
-    print(specialist_finden)
-    await message.answer(text="По вашим симптомам найдены следующие специальности врачей", reply_markup=make_row_keyboard(specialist_finden))
-    await state.clear()
+    await message.answer(text="По вашим симптомам найдены следующие специальности врачей\nВыберите, к кому записаться", reply_markup=make_row_keyboard(specialist_finden))
+    await state.set_state(Clinic.input_specialization)
+
+@router.message(Clinic.input_specialization, F.text.in_(specialization_arr))
+async def specialization_chosen(message: Message, state: FSMContext):
+    await state.update_data(chosen_specialization=message.text.lower())
+    await message.answer(text="Хорошо. Выберете конкретного врача.", reply_markup=make_row_keyboard(specialist_arr))
+    await state.set_state(Clinic.input_specialist)
+
+@router.message(Clinic.input_specialization)
+async def specialization_chosen_incorrectly(message: Message):
+    await message.answer(text="Я не знаю такой специальности\nПожалуйста, напишите другую специальность", reply_markup=make_row_keyboard(specialization_arr))
 
 
 
