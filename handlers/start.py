@@ -182,6 +182,7 @@ async def symptoms_chosen(message: Message, state: FSMContext):
     exist_sympton = db.select_symptom()
     symptom_finden = []
     id_finden = []
+    specialist_finden = []
     print(exist_sympton)
     for i in symptoms_split:
         i_srez = i[0:-1]
@@ -195,7 +196,10 @@ async def symptoms_chosen(message: Message, state: FSMContext):
     print(symptom_finden)
     for i in id_finden:
         specialist_for_symptom = db.find_specialist_for_symptom(int(i))
+        specialist_finden.append(specialist_for_symptom[0])
         print(specialist_for_symptom)
+    print(specialist_finden)
+    await message.answer(text="По вашим симптомам найдены следующие специальности врачей", reply_markup=make_row_keyboard(specialist_finden))
     await state.clear()
 
 
