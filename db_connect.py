@@ -62,6 +62,14 @@ class dbworker:
             for row in res:
                 arr.append(row[0])
             return arr
+    def get_spec(self):
+        '''Получение всех врачей'''
+        with self.connection:
+            res = self.cursor.execute('SELECT `Spec_name` FROM `Specs`').fetchall()
+            arr = []
+            for row in res:
+                arr.append(row[0])
+            return arr
     def get_user(self, user_id):
         '''Получение данных о пользователе'''
         

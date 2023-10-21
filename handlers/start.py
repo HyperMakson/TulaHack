@@ -45,7 +45,7 @@ for date in dateList:
 
 
 
-specialization_arr = ["Венеролог", "Вирусолог", "Гинеколог", "Дерматолог", "Терапевт", "Диетолог", "Акушер", "Кардиолог", "Нарколог", "Педиатр", "Хирург", "Лор"]
+specialization_arr = db.get_spec()
 specialist_arr = db.get_docs()
 time_arr = ["07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00",
             "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30","15:00",
@@ -128,7 +128,13 @@ async def time_chosen(message: Message, state: FSMContext):
             f"ФИО: {date_user[0]}\n"
             f"СНИЛС: {date_user[1]}\n"
             f"Полис: {date_user[2]}\n", reply_markup=ReplyKeyboardRemove())
-        await state.clear()       
+        await state.clear()
+        await message.answer(
+            text="Здравствуйте! Вас приветствует клиника AmNyam\n"
+                "Вы можете выбрать одно из действий, представленных ниже",
+            reply_markup=start_row_keyboard()
+        )
+         
 @router.message(Clinic.time)
 async def time_chosen_incorrectly(message: Message):
     await message.answer(text="Такого времени нет\nПожалуйста, выберите свободное время", reply_markup=make_row_keyboard(time_arr))
@@ -163,6 +169,11 @@ async def polis_chosen(message: Message, state: FSMContext):
     db.add_appoint(user_data['chosen_specialist'], message.from_user.id, user_data['chosen_date'], user_data['chosen_time'])
     db.add_user(message.from_user.id, user_data['chosen_fio'], user_data['chosen_snils'], user_data['chosen_polis'])
     await state.clear()
+    await message.answer(
+        text="Здравствуйте! Вас приветствует клиника AmNyam\n"
+            "Вы можете выбрать одно из действий, представленных ниже",
+        reply_markup=start_row_keyboard()
+    )
 
 
 
@@ -218,6 +229,9 @@ async def symptoms_chosen(message: Message, state: FSMContext):
 @router.message(Clinic.input_specialization, F.text.in_(specialization_arr))
 async def specialization_chosen(message: Message, state: FSMContext):
     await state.update_data(chosen_specialization=message.text.lower())
+    user_data = await state.get_data()
+    global specialist_arr
+    specialist_arr = db.get_all_docs(user_data['chosen_specialization'])
     await message.answer(text="Хорошо. Выберете конкретного врача.", reply_markup=make_row_keyboard(specialist_arr))
     await state.set_state(Clinic.input_specialist)
 
@@ -274,6 +288,11 @@ async def time_chosen(message: Message, state: FSMContext):
             f"СНИЛС: {date_user[1]}\n"
             f"Полис: {date_user[2]}\n", reply_markup=ReplyKeyboardRemove())
         await state.clear()
+        await message.answer(
+            text="Здравствуйте! Вас приветствует клиника AmNyam\n"
+                "Вы можете выбрать одно из действий, представленных ниже",
+            reply_markup=start_row_keyboard()
+        )
      
 @router.message(Clinic.input_time)
 async def time_chosen_incorrectly(message: Message):
@@ -309,6 +328,11 @@ async def polis_chosen(message: Message, state: FSMContext):
     db.add_appoint(user_data['chosen_specialist'], message.from_user.id, user_data['chosen_date'], user_data['chosen_time'])
     db.add_user(message.from_user.id, user_data['chosen_fio'], user_data['chosen_snils'], user_data['chosen_polis'])
     await state.clear()
+    await message.answer(
+        text="Здравствуйте! Вас приветствует клиника AmNyam\n"
+            "Вы можете выбрать одно из действий, представленных ниже",
+        reply_markup=start_row_keyboard()
+    )
 
 
 
@@ -318,3 +342,8 @@ async def polis_chosen(message: Message, state: FSMContext):
 async def cmd_cancel(message: Message, state: FSMContext):
     await state.clear()
     await message.answer(text="Действие отменено", reply_markup=ReplyKeyboardRemove())
+    await message.answer(
+        text="Здравствуйте! Вас приветствует клиника AmNyam\n"
+            "Вы можете выбрать одно из действий, представленных ниже",
+        reply_markup=start_row_keyboard()
+    )
