@@ -108,8 +108,8 @@ async def snils_chosen(message: Message, state: FSMContext):
 async def polis_chosen(message: Message, state: FSMContext):
     await state.update_data(chosen_polis=message.text.lower())
     user_data = await state.get_data()
-    #db.add_appoint(user_data['chosen_specialist'], message.from_user.id, user_data['chosen_date'], )
-    #db.add_user(message.from_user.id, user_data['chosen_fio'], user_data['chosen_snils'], user_data['chosen_polis'])
+    db.add_appoint(user_data['chosen_specialist'], message.from_user.id, user_data['chosen_date'], user_data['chosen_time'])
+    db.add_user(message.from_user.id, user_data['chosen_fio'], user_data['chosen_snils'], user_data['chosen_polis'])
     await message.answer(
         text=f"Специализация: {user_data['chosen_specialization']}\n"
             f"Специалист: {user_data['chosen_specialist']}\n"
