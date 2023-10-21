@@ -25,13 +25,17 @@ class Clinic(StatesGroup):
     input_symptoms = State()
 
 '''Списки значений кнопок'''
-specialization_arr = ["Терапевт", "Уролог", "Стоматолог", "Офтальмолог", "Гинеколог", "Дерматолог", "Хирург", "Лор"]
+specialization_arr = ["Венеролог", "Вирусолог", "Гинеколог", "Дерматолог", "Терапевт", "Диетолог", "Акушер", "Кардиолог", "Нарколог", "Педиатр", "Хирург", "Лор"]
 #specialist_arr = db.get_all_docs()
 specialist_arr = ["Цыбуля", "Сорокин", "Митяев", "Генералов", "Данилов"]
 date_arr = ["21.10", "22.10", "23.10", "24.10", "25.10", "26.10", "27.10"]
 time_arr = ["07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00",
             "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30","15:00",
             "15:30", "16:00", "16:30", "17:00"]
+
+dict_symptoms = {
+    "Венеролог": "gfh"
+}
 
 '''Начальное меню бота'''
 @router.message(Command("start"))
@@ -157,7 +161,13 @@ async def start_symptoms(callback: CallbackQuery, state: FSMContext):
 async def symptoms_chosen(message: Message, state: FSMContext):
     await state.update_data(chosen_symptoms=message.text.lower())
     symptoms_data = await state.get_data()
-    symptoms = symptoms_data['']
+    symptoms = symptoms_data['chosen_symptoms']
+    symptoms_split = str(symptoms).split()
+    for i in symptoms_split:
+        if i == dict_symptoms['Венеролог']:
+            print("ff")
+    print(symptoms)
+    await state.clear()
 
 
 
