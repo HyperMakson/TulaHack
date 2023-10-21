@@ -57,6 +57,14 @@ class dbworker:
             for row in res:
                 arr.append(row[0])
             return arr
+    def get_docs(self):
+        '''Получение всех врачей'''
+        with self.connection:
+            res = self.cursor.execute('SELECT `Doc_fio` FROM `Docs`').fetchall()
+            arr = []
+            for row in res:
+                arr.append(row[0])
+            return arr
     def get_user(self, user_id):
         '''Получение данных о пользователе'''
         
@@ -98,8 +106,8 @@ class dbworker:
                 arr.append(row[0])
             return arr
 
-db = dbworker('baza.db')
-print(db.get_all_docs('Терапевт'))
+#db = dbworker('baza.db')
+#print(db.get_all_docs('Терапевт'))
 
 
 

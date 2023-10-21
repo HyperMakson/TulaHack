@@ -46,7 +46,7 @@ for date in dateList:
 
 
 specialization_arr = ["Венеролог", "Вирусолог", "Гинеколог", "Дерматолог", "Терапевт", "Диетолог", "Акушер", "Кардиолог", "Нарколог", "Педиатр", "Хирург", "Лор"]
-specialist_arr = db.get_all_docs("Терапевт")
+specialist_arr = db.get_docs()
 time_arr = ["07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00",
             "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30","15:00",
             "15:30", "16:00", "16:30", "17:00"]
@@ -71,8 +71,11 @@ async def start_appointment(callback: CallbackQuery, state: FSMContext):
 async def specialization_chosen(message: Message, state: FSMContext):
     await state.update_data(chosen_specialization=message.text.lower())
     user_data = await state.get_data()
-    special = db.get_all_docs(user_data['chosen_specialization'])
-    await message.answer(text="Хорошо. Выберете конкретного врача.", reply_markup=make_row_keyboard(special))
+    print(user_data['chosen_specialization'])
+    global specialist_arr
+    specialist_arr = db.get_all_docs(user_data['chosen_specialization'])
+    print(specialist_arr)
+    await message.answer(text="Хорошо. Выберете конкретного врача.", reply_markup=make_row_keyboard(specialist_arr))
     await state.set_state(Clinic.specialist)
 
 @router.message(Clinic.specialization)
