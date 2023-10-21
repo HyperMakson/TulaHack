@@ -22,6 +22,8 @@ class Clinic(StatesGroup):
     user_snils = State()
     user_polis = State()
 
+    input_symptoms = State()
+
 '''Списки значений кнопок'''
 specialization_arr = ["Терапевт", "Уролог", "Стоматолог", "Офтальмолог", "Гинеколог", "Дерматолог", "Хирург", "Лор"]
 #specialist_arr = db.get_all_docs()
@@ -130,15 +132,33 @@ async def start_appointment(callback: CallbackQuery):
     await callback.message.answer("Вот ваши записи")
     await callback.answer()
 
+
+
+
+
 @router.callback_query(F.data == "my_tests")
 async def start_appointment(callback: CallbackQuery):
     await callback.message.answer("Это мои анализы")
     await callback.answer()
 
+
+
+
+
+
 @router.callback_query(F.data == "symptoms")
-async def start_appointment(callback: CallbackQuery):
+async def start_symptoms(callback: CallbackQuery, state: FSMContext):
     await callback.message.answer("Введите ваши симптомы")
+    await state.set_state(Clinic.input_symptoms)
     await callback.answer()
+
+@router.message(Clinic.input_symptoms)
+async def symptoms_chosen(message: Message, state: FSMContext):
+    await state.update_data(chosen_symptoms=message.text.lower())
+    symptoms = await state.get_data()
+
+
+
 
 @router.message(Command("cancel"))
 @router.message(F.text.lower() == "отмена")
