@@ -22,10 +22,14 @@ class Clinic(StatesGroup):
     user_snils = State()
     user_polis = State()
 
+    input_symptoms = State()
+
 '''Списки значений кнопок'''
 specialization_arr = ["Терапевт", "Уролог", "Стоматолог", "Офтальмолог", "Гинеколог", "Дерматолог", "Хирург", "Лор"]
-specialist_arr = db.get_all_docs()
-date_arr = ["07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00"
+#specialist_arr = db.get_all_docs()
+specialist_arr = ["Цыбуля", "Сорокин", "Митяев", "Генералов", "Данилов"]
+date_arr = ["21.10", "22.10", "23.10", "24.10", "25.10", "26.10", "27.10"]
+time_arr = ["07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00",
             "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30","15:00",
             "15:30", "16:00", "16:30", "17:00"]
 
@@ -61,7 +65,7 @@ async def specialization_chosen_incorrectly(message: Message):
 @router.message(Clinic.specialist, F.text.in_(specialist_arr))
 async def specialist_chosen(message: Message, state: FSMContext):
     await state.update_data(chosen_specialist=message.text.lower())
-    await message.answer(text="Хорошо. Выберете свободную дату и время.", reply_markup=make_row_keyboard(date_arr))
+    await message.answer(text="Хорошо. Выберете свободную дату.", reply_markup=make_row_keyboard(date_arr))
     await state.set_state(Clinic.date)
 
 @router.message(Clinic.specialist)
@@ -71,15 +75,14 @@ async def specialist_chosen_incorrectly(message: Message):
 @router.message(Clinic.date, F.text.in_(date_arr))
 async def date_chosen(message: Message, state: FSMContext):
     await state.update_data(chosen_date=message.text.lower())
-    await message.answer(text="Хорошо. Выберете свободное время.", reply_markup=ReplyKeyboardRemove())
+    await message.answer(text="Хорошо. Выберете свободное время.", reply_markup=make_row_keyboard(time_arr))
     await state.set_state(Clinic.time)
 
 @router.message(Clinic.date)
 async def date_chosen_incorrectly(message: Message):
-    await message.answer(text="Такой даты нет\nПожалуйста, выберите свободную дату")
+    await message.answer(text="Такой даты нет\nПожалуйста, выберите свободную дату", reply_markup=make_row_keyboard(date_arr))
 
-'''Здесь ошибка, я хз что делает F.text.in_(date_arr)'''
-@router.message(Clinic.time, F.text.in_(date_arr))
+@router.message(Clinic.time, F.text.in_(time_arr))
 async def time_chosen(message: Message, state: FSMContext):
     await state.update_data(chosen_time=message.text.lower())
     await message.answer(text="Хорошо. Введите ФИО полностью.", reply_markup=ReplyKeyboardRemove())
@@ -87,7 +90,7 @@ async def time_chosen(message: Message, state: FSMContext):
 
 @router.message(Clinic.time)
 async def time_chosen_incorrectly(message: Message):
-    await message.answer(text="Пожалуйста, выберите свободное время") 
+    await message.answer(text="Такого времени нет\nПожалуйста, выберите свободное время", reply_markup=make_row_keyboard(time_arr))
 
 @router.message(Clinic.user_fio)
 async def FIO_chosen(message: Message, state: FSMContext):
@@ -105,12 +108,13 @@ async def snils_chosen(message: Message, state: FSMContext):
 async def polis_chosen(message: Message, state: FSMContext):
     await state.update_data(chosen_polis=message.text.lower())
     user_data = await state.get_data()
-    db.add_appoint(user_data['chosen_specialist'], message.from_user.id, user_data['chosen_date'], )
-    db.add_user(message.from_user.id, user_data['chosen_fio'], user_data['chosen_snils'], user_data['chosen_polis'])
+    #db.add_appoint(user_data['chosen_specialist'], message.from_user.id, user_data['chosen_date'], )
+    #db.add_user(message.from_user.id, user_data['chosen_fio'], user_data['chosen_snils'], user_data['chosen_polis'])
     await message.answer(
         text=f"Специализация: {user_data['chosen_specialization']}\n"
             f"Специалист: {user_data['chosen_specialist']}\n"
-            f"Дата и время: {user_data['chosen_date']}\n"
+            f"Дата: {user_data['chosen_date']}\n"
+            f"Время: {user_data['chosen_time']}\n"
             f"Данные пользователя:\n"
             f"ФИО: {user_data['chosen_fio']}\n"
             f"СНИЛС: {user_data['chosen_snils']}\n"
@@ -128,12 +132,36 @@ async def start_appointment(callback: CallbackQuery):
     await callback.message.answer("Вот ваши записи")
     await callback.answer()
 
+
+
+
+
 @router.callback_query(F.data == "my_tests")
 async def start_appointment(callback: CallbackQuery):
     await callback.message.answer("Это мои анализы")
     await callback.answer()
 
+
+
+
+
+
 @router.callback_query(F.data == "symptoms")
-async def start_appointment(callback: CallbackQuery):
+async def start_symptoms(callback: CallbackQuery, state: FSMContext):
     await callback.message.answer("Введите ваши симптомы")
+    await state.set_state(Clinic.input_symptoms)
     await callback.answer()
+
+@router.message(Clinic.input_symptoms)
+async def symptoms_chosen(message: Message, state: FSMContext):
+    await state.update_data(chosen_symptoms=message.text.lower())
+    symptoms = await state.get_data()
+
+
+
+
+@router.message(Command("cancel"))
+@router.message(F.text.lower() == "отмена")
+async def cmd_cancel(message: Message, state: FSMContext):
+    await state.clear()
+    await message.answer(text="Действие отменено", reply_markup=ReplyKeyboardRemove())
