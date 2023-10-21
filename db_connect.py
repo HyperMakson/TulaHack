@@ -41,9 +41,12 @@ class dbworker:
                 arr1.append(arr)
                 arr = []
         return arr1
-    def get_all_docs(self):
-        '''Вывод всех врачей'''
+    def get_all_docs(self, spec_name):
+        
+        '''Получение всех врачей заданых по заданной специальности'''
+        
         with self.connection:
+            res = self.cursor.execute('SELECT `Spec_id` FROM `Specs` WHERE `Spec_name` = ?', (spec_name,))
             res = self.cursor.execute('SELECT `Doc_fio` FROM `Docs`').fetchall()
             arr = []
             for row in res:
@@ -78,6 +81,13 @@ class dbworker:
         '''Получение всех симптомов'''
         with self.connection:
             res = self.cursor.execute('SELECT `Spec_name` FROM `Specs` WHERE `Spec_id` = ?', (id_sympt,)).fetchall()
+            arr = []
+            for row in res:
+                arr.append(row[0])
+            return arr
+    def get_time_date(self, date):
+        with self.connection:
+            res = self.cursor.execute('SELECT `Time` FROM `Appoints` WHERE `Date` = ?', (date,)).fetchall()
             arr = []
             for row in res:
                 arr.append(row[0])
