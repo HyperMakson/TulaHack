@@ -137,3 +137,9 @@ async def start_appointment(callback: CallbackQuery):
 async def start_appointment(callback: CallbackQuery):
     await callback.message.answer("Введите ваши симптомы")
     await callback.answer()
+
+@router.message(Command("cancel"))
+@router.message(F.text.lower() == "отмена")
+async def cmd_cancel(message: Message, state: FSMContext):
+    await state.clear()
+    await message.answer(text="Действие отменено", reply_markup=ReplyKeyboardRemove())
