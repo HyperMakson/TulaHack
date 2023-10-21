@@ -156,7 +156,8 @@ async def start_symptoms(callback: CallbackQuery, state: FSMContext):
 @router.message(Clinic.input_symptoms)
 async def symptoms_chosen(message: Message, state: FSMContext):
     await state.update_data(chosen_symptoms=message.text.lower())
-    symptoms = await state.get_data()
+    symptoms_data = await state.get_data()
+    symptoms = symptoms_data['']
 
 
 
