@@ -30,7 +30,8 @@ class dbworker:
     def get_all_appoints_user(self, user_id):
         '''Вывод всех записей пользователя '''
         with self.connection:
-            res = self.cursor.execute('SELECT * FROM `Appoints` WHERE `User_id` = ?', (user_id,)).fetchall()
+            res = self.cursor.execute('SELECT Specs.Spec_name, Docs.Doc_fio, Appoints.Date, Appoints.Time FROM Docs, Specs, Appoints WHERE Docs.Doc_id = Appoints.Doc_id AND Specs.Spec_id = Docs.Spec_id AND Appoints.User_id = ?', (user_id,)).fetchall()
+            print(res)
             arr = []
             arr1 = []
             for row in res:
@@ -38,9 +39,9 @@ class dbworker:
                 arr.append(row[1])
                 arr.append(row[2])
                 arr.append(row[3])
-                arr.append(row[4])
                 arr1.append(arr)
                 arr = []
+            print(arr1)
         return arr1
     def get_all_docs(self, spec_name):
         

@@ -120,14 +120,16 @@ async def time_chosen(message: Message, state: FSMContext):
         '''Получение данных о пользователе из базы данных'''
         date_user = db.get_user(message.from_user.id)
         await message.answer(
-        text=f"Специализация: {user_data['chosen_specialization']}\n"
-            f"Специалист: {user_data['chosen_specialist']}\n"
-            f"Дата: {user_data['chosen_date']}\n"
-            f"Время: {user_data['chosen_time']}\n"
-            f"Данные пользователя:\n"
-            f"ФИО: {date_user[0]}\n"
-            f"СНИЛС: {date_user[1]}\n"
-            f"Полис: {date_user[2]}\n", reply_markup=ReplyKeyboardRemove())
+            text=f"Специализация: {user_data['chosen_specialization']}\n"
+                f"Специалист: {user_data['chosen_specialist']}\n"
+                f"Дата: {user_data['chosen_date']}\n"
+                f"Время: {user_data['chosen_time']}\n"
+                f"Данные пользователя:\n"
+                f"ФИО: {date_user[0]}\n"
+                f"СНИЛС: {date_user[1]}\n"
+                f"Полис: {date_user[2]}\n", reply_markup=ReplyKeyboardRemove()
+        )
+        db.add_appoint(user_data['chosen_specialist'], message.from_user.id, user_data['chosen_date'], user_data['chosen_time'])
         await state.clear()
         await message.answer(
             text="Здравствуйте! Вас приветствует клиника AmNyam\n"
@@ -180,7 +182,12 @@ async def polis_chosen(message: Message, state: FSMContext):
 
 @router.callback_query(F.data == "my_notes")
 async def start_appointment(callback: CallbackQuery):
-    await callback.message.answer("Вот ваши записи")
+    notes_user = db.get_all_appoints_user(callback.from_user.id)
+    for i in range(len(notes_user)):
+        print(notes_user[i])
+        notes_user_arr = [str(x) for x in notes_user[i]]
+        notes_user_join = '\n'.join(notes_user_arr)
+        await callback.message.answer(notes_user_join)
     await callback.answer()
 
 
