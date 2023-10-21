@@ -8,6 +8,7 @@ from keyboards.simple_keyboard import make_row_keyboard
 from db_connect import dbworker
 
 '''Подключение к базе данных'''
+
 db = dbworker('baza.db')
 
 router = Router()
