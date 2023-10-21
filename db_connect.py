@@ -1,14 +1,5 @@
 import sqlite3 
 
-<<<<<<< HEAD
-import sqlite3 as sq
-def sql_start():
-    global base, cur
-    base = sq.connect('baza.db')
-    cur = base.cursor()
-    if base:
-        print("БД подключена успешно")
-=======
 class dbworker:
     def __init__(self, database_file):
         self.connection = sqlite3.connect(database_file)
@@ -79,7 +70,6 @@ class dbworker:
         
         
     
->>>>>>> cfebdeb52022048c3c0c7696aff3c92f79301b5f
 
     
 
