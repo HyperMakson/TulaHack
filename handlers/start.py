@@ -150,6 +150,7 @@ async def start_appointment(callback: CallbackQuery):
 
 
 
+
 @router.callback_query(F.data == "my_tests")
 async def start_appointment(callback: CallbackQuery):
     await callback.message.answer("Это мои анализы")
