@@ -57,15 +57,6 @@ class dbworker:
             snils = res[1]
             polis = res[2]
         return user_fio, snils, polis
-    def get_time_date(self, date):
-        with self.connection:
-            res = self.cursor.execute('SELECT `Time` FROM `Appoints` WHERE `Date` = ?', (date,)).fetchall()
-            arr = []
-            for row in res:
-                arr.append(row[0])
-            return arr
-
-
 
 
 

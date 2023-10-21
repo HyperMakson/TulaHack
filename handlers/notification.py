@@ -8,7 +8,7 @@ current_date = datetime.date.today() #текущая дата и время
 current_date = int(current_date.strftime("%d%m"))
 #print(current_date)
 
-
+#finally
 
 #cursor.execute("SELECT `snils` FROM `Users`")
 #dateint = cursor.fetchall()
