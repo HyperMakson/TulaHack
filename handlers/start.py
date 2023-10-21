@@ -89,9 +89,23 @@ async def date_chosen_incorrectly(message: Message):
 @router.message(Clinic.time, F.text.in_(time_arr))
 async def time_chosen(message: Message, state: FSMContext):
     await state.update_data(chosen_time=message.text.lower())
-    await message.answer(text="Хорошо. Введите ФИО полностью.", reply_markup=ReplyKeyboardRemove())
-    await state.set_state(Clinic.user_fio)
-
+    if db.user_exists(message.from_user.id) == False:
+       await message.answer(text="Хорошо. Введите ФИО полностью.", reply_markup=ReplyKeyboardRemove())
+       await state.set_state(Clinic.user_fio)
+    else:
+        
+        user_data = await state.get_data()
+        date_user = db.get_user(message.from_user.id)
+        await message.answer(
+        text=f"Специализация: {user_data['chosen_specialization']}\n"
+            f"Специалист: {user_data['chosen_specialist']}\n"
+            f"Дата: {user_data['chosen_date']}\n"
+            f"Время: {user_data['chosen_time']}\n"
+            f"Данные пользователя:\n"
+            f"ФИО: {date_user[0]}\n"
+            f"СНИЛС: {date_user[1]}\n"
+            f"Полис: {date_user[2]}\n", reply_markup=ReplyKeyboardRemove())
+        await state.clear()       
 @router.message(Clinic.time)
 async def time_chosen_incorrectly(message: Message):
     await message.answer(text="Такого времени нет\nПожалуйста, выберите свободное время", reply_markup=make_row_keyboard(time_arr))
@@ -126,8 +140,6 @@ async def polis_chosen(message: Message, state: FSMContext):
     db.add_appoint(user_data['chosen_specialist'], message.from_user.id, user_data['chosen_date'], user_data['chosen_time'])
     db.add_user(message.from_user.id, user_data['chosen_fio'], user_data['chosen_snils'], user_data['chosen_polis'])
     await state.clear()
-
-
 
 
 
