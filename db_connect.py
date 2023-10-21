@@ -50,8 +50,9 @@ class dbworker:
         '''Получение всех врачей заданых по заданной специальности'''
         
         with self.connection:
-            res = self.cursor.execute('SELECT `Spec_id` FROM `Specs` WHERE `Spec_name` = ?', (spec_name,))
-            res = self.cursor.execute('SELECT `Doc_fio` FROM `Docs`').fetchall()
+            result = self.cursor.execute('SELECT `Spec_id` FROM `Specs` WHERE `Spec_name` = ?', (spec_name,)).fetchone()
+            spec_id = result[0]
+            res = self.cursor.execute('SELECT `Doc_fio` FROM `Docs` WHERE `Spec_id` = ?', (spec_id,)).fetchall()
             arr = []
             for row in res:
                 arr.append(row[0])
@@ -97,6 +98,8 @@ class dbworker:
                 arr.append(row[0])
             return arr
 
+db = dbworker('baza.db')
+print(db.get_all_docs('Терапевт'))
 
 
 

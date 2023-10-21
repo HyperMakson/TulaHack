@@ -70,7 +70,9 @@ async def start_appointment(callback: CallbackQuery, state: FSMContext):
 @router.message(Clinic.specialization, F.text.in_(specialization_arr))
 async def specialization_chosen(message: Message, state: FSMContext):
     await state.update_data(chosen_specialization=message.text.lower())
-    await message.answer(text="Хорошо. Выберете конкретного врача.", reply_markup=make_row_keyboard(specialist_arr))
+    user_data = await state.get_data()
+    special = db.get_all_docs(user_data['chosen_specialization'])
+    await message.answer(text="Хорошо. Выберете конкретного врача.", reply_markup=make_row_keyboard(special))
     await state.set_state(Clinic.specialist)
 
 @router.message(Clinic.specialization)
