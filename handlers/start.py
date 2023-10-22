@@ -198,6 +198,17 @@ async def start_appointment(callback: CallbackQuery):
         notes_user_arr = [str(x) for x in notes_user[i]]
         notes_user_join = '\n'.join(notes_user_arr)
         await callback.message.answer(notes_user_join)
+    buttons = [
+        [InlineKeyboardButton(text="Запись на приём", callback_data="appointment")],
+        [InlineKeyboardButton(text="Удалить запись", callback_data="del_appointment")]
+    ]
+    keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+    await callback.message.answer(text="Вы можете сделать одно из следующих действий", reply_markup=keyboard)
+    await callback.answer()
+
+@router.callback_query(F.data == "del_appointment")
+async def cmd_del_appointment(callback: CallbackQuery):
+    await callback.message.answer("Скоро будет")
     await callback.answer()
 
 
