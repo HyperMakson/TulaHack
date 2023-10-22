@@ -111,9 +111,13 @@ class dbworker:
                 if row[0] != 'expected':
                     arr.append(row[0])
             return arr
-        
-db = dbworker('baza.db')
-print(db.get_file(1178452807))
+    def get_time_date(self, date):
+        with self.connection:
+            res = self.cursor.execute('SELECT `Time` FROM `Appoints` WHERE `Date` = ?', (date,)).fetchall()
+            arr = []
+            for row in res:
+                arr.append(row[0])
+            return arr
 
 
 
