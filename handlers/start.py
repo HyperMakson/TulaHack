@@ -32,6 +32,7 @@ class Clinic(StatesGroup):
     input_user_fio = State()
     input_user_snils = State()
     input_user_polis = State()
+    del_state = State()
 
 '''Получаем следующие 9 будних дней'''
 
@@ -50,6 +51,7 @@ specialist_arr = db.get_docs()
 time_arr = ["07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00",
             "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30","15:00",
             "15:30", "16:00", "16:30", "17:00"]
+items = ["1", "2", "3"]
 
 '''Начальное меню бота'''
 @router.message(Command("start"))
@@ -252,9 +254,53 @@ async def start_appointment(callback: CallbackQuery):
         await callback.answer()
 
 @router.callback_query(F.data == "del_appointment")
-async def cmd_del_appointment(callback: CallbackQuery):
-    await callback.message.answer("Скоро будет")
-    await callback.answer()
+async def cmd_del_appointment(callback: CallbackQuery, state: FSMContext):
+    try:
+        notes_user = db.get_all_appoints_user(callback.from_user.id)
+        print(notes_user)
+        global items
+        items = []
+        for i in range(len(notes_user)):
+            notes_user_arr = [str(x) for x in notes_user[i]]
+            print(notes_user_arr)
+            length = len(notes_user_arr[0])
+            print(length)
+            if length > 9:
+                diff = length - 8
+                items.append(notes_user_arr[0][-diff:])
+            else:
+                items.append(notes_user_arr[0][-1])
+        print(items)
+        await callback.message.answer("Выберите какую запись удалить", reply_markup=make_row_keyboard(items))
+        await state.set_state(Clinic.del_state)
+        await callback.answer()
+    except:
+        await callback.message.answer(text="Произошла ошибка", reply_markup=ReplyKeyboardRemove())
+        await callback.message.answer(
+            text="Здравствуйте! Вас приветствует клиника AmNyam\n"
+                "Вы можете выбрать одно из действий, представленных ниже",
+            reply_markup=start_row_keyboard()
+        )
+        await callback.answer()
+
+@router.message(Clinic.del_state, F.text.in_(items))
+async def del_from_db(message: Message, state: FSMContext):
+    try:
+        global items
+        print(items)
+        await state.update_data(chosen_id_del=message.text.lower())
+        user_data = await state.get_data()
+        db.del_appoint(user_data['chosen_id_del'])
+        await message.answer(text="Хорошо. Запись удалена")
+        await state.set_state(Clinic.user_snils)
+    except:
+        await state.clear()
+        await message.answer(text="Произошла ошибка", reply_markup=ReplyKeyboardRemove())
+        await message.answer(
+            text="Здравствуйте! Вас приветствует клиника AmNyam\n"
+                "Вы можете выбрать одно из действий, представленных ниже",
+            reply_markup=start_row_keyboard()
+        )
 
 
 

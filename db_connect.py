@@ -23,28 +23,24 @@ class dbworker:
                 arr.append(row[0])
             doc_id = arr[0]
             return self.cursor.execute('INSERT INTO `Appoints` (`Doc_id`, `User_id`, `Date`, `Time`, `Tests`) VALUES(?,?,?,?,?)', (doc_id, user_id, date, time, 'expected'))
-    def del_appoint(self, user_id, date, time):
+    def del_appoint(self, user_id):
         '''Удаление записи к врачу'''
         with self.connection:
-            return self.cursor.execute('DELETE FROM `Appoints` WHERE `User_id` = ? AND `Date` = ? AND `Time` = ?', (user_id, date, time,))
+            return self.cursor.execute('DELETE FROM `Appoints` WHERE `User_id` = ?', (user_id,))
     def get_all_appoints_user(self, user_id):
         '''Вывод всех записей пользователя '''
         with self.connection:
-            res = self.cursor.execute('SELECT Specs.Spec_name, Docs.Doc_fio, Appoints.Date, Appoints.Time FROM Docs, Specs, Appoints WHERE Docs.Doc_id = Appoints.Doc_id AND Specs.Spec_id = Docs.Spec_id AND Appoints.User_id = ?', (user_id,)).fetchall()
-            print(res)
+            res = self.cursor.execute('SELECT Appoints.Id, Specs.Spec_name, Docs.Doc_fio, Appoints.Date, Appoints.Time FROM Docs, Specs, Appoints WHERE Docs.Doc_id = Appoints.Doc_id AND Specs.Spec_id = Docs.Spec_id AND Appoints.User_id = ?', (user_id,)).fetchall()
             arr = []
             arr1 = []
-            i = 0
             for row in res:
-                i += 1
-                arr.append(f"Запись №{i}")
-                arr.append(f"Специализация: {row[0]}")
-                arr.append(f"Специалист: {row[1]}")
-                arr.append(f"Дата: {row[2]}")
-                arr.append(f"Время: {row[3]}")
+                arr.append(f"Запись №{row[0]}")
+                arr.append(f"Специализация: {row[1]}")
+                arr.append(f"Специалист: {row[2]}")
+                arr.append(f"Дата: {row[3]}")
+                arr.append(f"Время: {row[4]}")
                 arr1.append(arr)
                 arr = []
-            print(arr1)
         return arr1
     def get_all_docs(self, spec_name):
         
