@@ -63,6 +63,7 @@ async def cmd_start(message: Message):
         reply_markup=start_row_keyboard()
     )
 
+'''Команда отмена'''
 @router.message(Command("cancel"))
 @router.message(F.text.lower() == "отмена")
 async def cmd_cancel(message: Message, state: FSMContext):
@@ -229,7 +230,7 @@ async def polis_chosen(message: Message, state: FSMContext):
 
 
 
-
+'''Кнопка мои записи'''
 @router.callback_query(F.data == "my_notes")
 async def start_appointment(callback: CallbackQuery):
     try:
@@ -238,8 +239,9 @@ async def start_appointment(callback: CallbackQuery):
             notes_user_arr = [str(x) for x in notes_user[i]]
             notes_user_join = '\n'.join(notes_user_arr)
             await callback.message.answer(notes_user_join)
+        '''Клавиатура удалить запись и повторный приём'''
         buttons = [
-            [InlineKeyboardButton(text="Запись на приём", callback_data="appointment")],
+            [InlineKeyboardButton(text="Запись на повторный приём", callback_data="appointment")],
             [InlineKeyboardButton(text="Удалить запись", callback_data="del_appointment")]
         ]
         keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
@@ -307,13 +309,11 @@ async def del_from_db(message: Message, state: FSMContext):
         )
 
 
-
-
-
-
+'''Кнопка анализы'''
 @router.callback_query(F.data == "my_tests")
 async def start_appointment(callback: CallbackQuery):
     tests = db.get_file(callback.from_user.id)
+    '''Проверка готовности анализов'''
     if tests != []:
         await callback.message.answer(text='Вот ваши анализы')
         for test in tests:
@@ -323,6 +323,7 @@ async def start_appointment(callback: CallbackQuery):
         await callback.message.answer(text='У вас нет анализов или они ещё не готовы')  
     await callback.answer()
 
+'''Кнопка симптомы'''
 @router.callback_query(F.data == "symptoms")
 async def start_symptoms(callback: CallbackQuery, state: FSMContext):
     await callback.message.answer("Введите ваши симптомы")
