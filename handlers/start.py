@@ -51,7 +51,7 @@ specialist_arr = db.get_docs()
 time_arr = ["07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00",
             "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30","15:00",
             "15:30", "16:00", "16:30", "17:00"]
-items = ["1", "2", "3"]
+items = []
 
 '''Начальное меню бота'''
 @router.message(Command("start"))
@@ -283,16 +283,19 @@ async def cmd_del_appointment(callback: CallbackQuery, state: FSMContext):
         )
         await callback.answer()
 
-@router.message(Clinic.del_state, F.text.in_(items))
+@router.message(Clinic.del_state)
 async def del_from_db(message: Message, state: FSMContext):
     try:
-        global items
-        print(items)
         await state.update_data(chosen_id_del=message.text.lower())
         user_data = await state.get_data()
         db.del_appoint(user_data['chosen_id_del'])
         await message.answer(text="Хорошо. Запись удалена")
-        await state.set_state(Clinic.user_snils)
+        await state.clear()
+        await message.answer(
+            text="Здравствуйте! Вас приветствует клиника AmNyam\n"
+                "Вы можете выбрать одно из действий, представленных ниже",
+            reply_markup=start_row_keyboard()
+        )
     except:
         await state.clear()
         await message.answer(text="Произошла ошибка", reply_markup=ReplyKeyboardRemove())
