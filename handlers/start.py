@@ -289,7 +289,7 @@ async def del_from_db(message: Message, state: FSMContext):
         await state.update_data(chosen_id_del=message.text.lower())
         user_data = await state.get_data()
         db.del_appoint(user_data['chosen_id_del'])
-        await message.answer(text="Хорошо. Запись удалена")
+        await message.answer(text="Хорошо. Запись удалена", reply_markup=ReplyKeyboardRemove())
         await state.clear()
         await message.answer(
             text="Здравствуйте! Вас приветствует клиника AmNyam\n"
