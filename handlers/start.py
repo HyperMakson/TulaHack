@@ -68,6 +68,7 @@ async def cmd_start(message: Message):
 '''Команда отмена'''
 @router.message(Command("cancel"))
 @router.message(F.text.lower() == "отмена")
+@router.callback_query(F.data == "cancel_appointment")
 async def cmd_cancel(message: Message, state: FSMContext):
     await state.clear()
     await message.answer(text="Действие отменено", reply_markup=ReplyKeyboardRemove())
@@ -244,7 +245,8 @@ async def start_appointment(callback: CallbackQuery):
         '''Клавиатура удалить запись и повторный приём'''
         buttons = [
             [InlineKeyboardButton(text="Запись на повторный приём", callback_data="appointment")],
-            [InlineKeyboardButton(text="Удалить запись", callback_data="del_appointment")]
+            [InlineKeyboardButton(text="Удалить запись", callback_data="del_appointment")],
+            [InlineKeyboardButton(text="Отмена", callback_data="cancel_appointment")]
         ]
         keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
         await callback.message.answer(text="Вы можете сделать одно из следующих действий", reply_markup=keyboard)
