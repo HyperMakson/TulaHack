@@ -68,7 +68,6 @@ async def cmd_start(message: Message):
 '''Команда отмена'''
 @router.message(Command("cancel"))
 @router.message(F.text.lower() == "отмена")
-@router.callback_query(F.data == "cancel_appointment")
 async def cmd_cancel(message: Message, state: FSMContext):
     await state.clear()
     await message.answer(text="Действие отменено", reply_markup=ReplyKeyboardRemove())
@@ -290,6 +289,16 @@ async def cmd_del_appointment(callback: CallbackQuery, state: FSMContext):
         )
         await callback.answer()
 
+@router.callback_query(F.data == "cancel_appointment")
+async def cmd_cancel(message: Message, state: FSMContext):
+    await state.clear()
+    await message.answer(text="Действие отменено", reply_markup=ReplyKeyboardRemove())
+    await message.answer(
+        text="Здравствуйте! Вас приветствует клиника AmNyam\n"
+            "Вы можете выбрать одно из действий, представленных ниже",
+        reply_markup=start_row_keyboard()
+    )
+
 @router.message(Clinic.del_state)
 async def del_from_db(message: Message, state: FSMContext):
     try:
@@ -363,11 +372,13 @@ async def symptoms_chosen(message: Message, state: FSMContext):
         for i in id_finden:
             specialist_for_symptom = db.find_specialist_for_symptom(int(i))
             specialist_finden.append(specialist_for_symptom[0])
+        if len(specialist_finden) == 0:
+            specialist_finden.append("терапевт")
         await message.answer(text="По вашим симптомам найдены следующие специальности врачей\nВыберите, к кому записаться", reply_markup=make_row_keyboard(specialist_finden))
         await state.set_state(Clinic.input_specialization)
     except:
         await state.clear()
-        await message.answer(text="Произошла ошибка", reply_markup=ReplyKeyboardRemove())
+        await message.answer(text="Запишитесь к терапевту", reply_markup=ReplyKeyboardRemove())
         await message.answer(
             text="Здравствуйте! Вас приветствует клиника AmNyam\n"
                 "Вы можете выбрать одно из действий, представленных ниже",
