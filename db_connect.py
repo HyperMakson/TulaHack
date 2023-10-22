@@ -23,10 +23,10 @@ class dbworker:
                 arr.append(row[0])
             doc_id = arr[0]
             return self.cursor.execute('INSERT INTO `Appoints` (`Doc_id`, `User_id`, `Date`, `Time`, `Tests`) VALUES(?,?,?,?,?)', (doc_id, user_id, date, time, 'expected'))
-    def del_appoint(self, user_id):
+    def del_appoint(self, id):
         '''Удаление записи к врачу'''
         with self.connection:
-            return self.cursor.execute('DELETE FROM `Appoints` WHERE `User_id` = ?', (user_id,))
+            return self.cursor.execute('DELETE FROM Appoints WHERE Id = ?', (id,))
     def get_all_appoints_user(self, user_id):
         '''Вывод всех записей пользователя '''
         with self.connection:
