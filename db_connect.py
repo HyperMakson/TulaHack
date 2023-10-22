@@ -116,7 +116,8 @@ class dbworker:
             res = self.cursor.execute('SELECT `Time` FROM `Appoints` WHERE `Date` = ?', (date,)).fetchall()
             arr = []
             for row in res:
-                arr.append(row[0])
+                if row != 'expected':
+                    arr.append(row[0])
             return arr    
 
 

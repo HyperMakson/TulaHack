@@ -1,4 +1,4 @@
-from aiogram import Router, F, Bot
+from aiogram import Router, F
 from aiogram.filters.command import Command
 from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, ReplyKeyboardRemove, FSInputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -9,7 +9,7 @@ from keyboards.start_keyboard import start_row_keyboard
 from db_connect import dbworker
 import pandas as pd
 from datetime import datetime
-from aiogram.methods.send_document import SendDocument
+
 '''Подключение к базе данных'''
 
 db = dbworker('baza.db')
@@ -312,21 +312,16 @@ async def del_from_db(message: Message, state: FSMContext):
 
 
 @router.callback_query(F.data == "my_tests")
-async def start_appointment(callback: CallbackQuery, bot:Bot):
+async def start_appointment(callback: CallbackQuery):
     tests = db.get_file(callback.from_user.id)
-    await callback.message.answer(text='Вот ваши анализы')
-    for test in tests:
-        print(test)
-        file = FSInputFile(test, filename="Analiz.pdf")
-        await callback.message.answer_document(file)
-        
-        
+    if tests != []:
+        await callback.message.answer(text='Вот ваши анализы')
+        for test in tests:
+            file = FSInputFile(test, filename="Analiz.pdf")
+            await callback.message.answer_document(file)
+    else:
+        await callback.message.answer(text='У вас нет анализов или они ещё не готовы')  
     await callback.answer()
-
-
-
-
-
 
 @router.callback_query(F.data == "symptoms")
 async def start_symptoms(callback: CallbackQuery, state: FSMContext):
