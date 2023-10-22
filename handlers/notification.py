@@ -1,7 +1,21 @@
 import datetime
-import sqlite3 
+import sqlite3
+import asyncio
+import aioschedule
 
-conn = sqlite3.connect('baza1.db')
+async def noon_print():
+    print("It's noon!")
+
+async def scheduler():
+    aioschedule.every().day.at("12:00").do(noon_print)
+    while True:
+        await aioschedule.run_pending()
+        await asyncio.sleep(1)
+
+async def on_startup(_):
+    asyncio.create_task(scheduler())
+
+conn = sqlite3.connect('baza.db')
 cursor = conn.cursor()
 
 current_date = datetime.date.today() #текущая дата и время

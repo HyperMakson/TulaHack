@@ -427,7 +427,7 @@ async def time_chosen(message: Message, state: FSMContext):
         if db.user_exists(message.from_user.id) == False:
             '''Проверка на наличие пользователя в базе данных'''
             await message.answer(text="Хорошо. Введите ФИО полностью.", reply_markup=ReplyKeyboardRemove())
-            await state.set_state(Clinic.user_fio)
+            await state.set_state(Clinic.input_user_fio)
         else:
             user_data = await state.get_data()
             '''Получение данных о пользователе из базы данных'''
@@ -441,6 +441,7 @@ async def time_chosen(message: Message, state: FSMContext):
                 f"ФИО: {date_user[0]}\n"
                 f"СНИЛС: {date_user[1]}\n"
                 f"Полис: {date_user[2]}\n", reply_markup=ReplyKeyboardRemove())
+            db.add_appoint(user_data['chosen_specialist'], message.from_user.id, user_data['chosen_date'], user_data['chosen_time'])
             await state.clear()
             await message.answer(
                 text="Здравствуйте! Вас приветствует клиника AmNyam\n"
