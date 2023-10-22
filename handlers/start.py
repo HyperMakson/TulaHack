@@ -55,6 +55,8 @@ items = []
 
 '''Начальное меню бота'''
 @router.message(Command("start"))
+@router.message(F.text.lower() == "старт")
+@router.message(F.text.lower() == "начать")
 async def cmd_start(message: Message):
     await message.answer(
         text="Здравствуйте! Вас приветствует клиника AmNyam\n"
