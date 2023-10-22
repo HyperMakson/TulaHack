@@ -103,16 +103,17 @@ class dbworker:
             for row in res:
                 arr.append(row[0])
             return arr
-    def get_time_date(self, date):
+    def get_file(self, user_id):
         with self.connection:
-            res = self.cursor.execute('SELECT `Time` FROM `Appoints` WHERE `Date` = ?', (date,)).fetchall()
+            res = self.cursor.execute('SELECT `Tests` FROM `Appoints` WHERE `User_id` = ?', (user_id,)).fetchall()
             arr = []
             for row in res:
-                arr.append(row[0])
+                if row[0] != 'expected':
+                    arr.append(row[0])
             return arr
-
-#db = dbworker('baza.db')
-#print(db.get_all_docs('Терапевт'))
+        
+db = dbworker('baza.db')
+print(db.get_file(1178452807))
 
 
 
