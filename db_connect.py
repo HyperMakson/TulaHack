@@ -118,8 +118,7 @@ class dbworker:
             for row in res:
                 arr.append(row[0])
             return arr    
-db = dbworker('baza.db')
-print(db.get_file(5168519141))
+
 
 
 
