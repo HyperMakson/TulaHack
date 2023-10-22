@@ -316,16 +316,25 @@ async def del_from_db(message: Message, state: FSMContext):
 '''Кнопка анализы'''
 @router.callback_query(F.data == "my_tests")
 async def start_appointment(callback: CallbackQuery):
-    tests = db.get_file(callback.from_user.id)
-    '''Проверка готовности анализов'''
-    if tests != []:
-        await callback.message.answer(text='Вот ваши анализы')
-        for test in tests:
-            file = FSInputFile(test, filename="Analiz.pdf")
-            await callback.message.answer_document(file)
-    else:
-        await callback.message.answer(text='У вас нет анализов или они ещё не готовы')  
-    await callback.answer()
+    try:
+        tests = db.get_file(callback.from_user.id)
+        '''Проверка готовности анализов'''
+        if tests != []:
+            await callback.message.answer(text='Вот ваши анализы', reply_markup=ReplyKeyboardRemove())
+            for test in tests:
+                file = FSInputFile(test, filename="Analiz.pdf")
+                await callback.message.answer_document(file)
+        else:
+            await callback.message.answer(text='У вас нет анализов или они ещё не готовы', reply_markup=ReplyKeyboardRemove())  
+        await callback.answer()
+    except:
+        await callback.message.answer(text="Произошла ошибка", reply_markup=ReplyKeyboardRemove())
+        await callback.message.answer(
+            text="Здравствуйте! Вас приветствует клиника AmNyam\n"
+                "Вы можете выбрать одно из действий, представленных ниже",
+            reply_markup=start_row_keyboard()
+        )
+        await callback.answer()
 
 '''Кнопка симптомы'''
 @router.callback_query(F.data == "symptoms")
@@ -509,7 +518,3 @@ async def polis_chosen(message: Message, state: FSMContext):
                 "Вы можете выбрать одно из действий, представленных ниже",
             reply_markup=start_row_keyboard()
         )
-
-
-
-
