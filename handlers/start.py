@@ -80,12 +80,21 @@ async def start_appointment(callback: CallbackQuery, state: FSMContext):
 
 @router.message(Clinic.specialization, F.text.in_(specialization_arr))
 async def specialization_chosen(message: Message, state: FSMContext):
-    await state.update_data(chosen_specialization=message.text.lower())
-    user_data = await state.get_data()
-    global specialist_arr
-    specialist_arr = db.get_all_docs(user_data['chosen_specialization'])
-    await message.answer(text="Хорошо. Выберете конкретного врача.", reply_markup=make_row_keyboard(specialist_arr))
-    await state.set_state(Clinic.specialist)
+    try:
+        await state.update_data(chosen_specialization=message.text.lower())
+        user_data = await state.get_data()
+        global specialist_arr
+        specialist_arr = db.get_all_docs(user_data['chosen_specialization'])
+        await message.answer(text="Хорошо. Выберете конкретного врача.", reply_markup=make_row_keyboard(specialist_arr))
+        await state.set_state(Clinic.specialist)
+    except:
+        await state.clear()
+        await message.answer(text="Произошла ошибка", reply_markup=ReplyKeyboardRemove())
+        await message.answer(
+            text="Здравствуйте! Вас приветствует клиника AmNyam\n"
+                "Вы можете выбрать одно из действий, представленных ниже",
+            reply_markup=start_row_keyboard()
+        )
 
 @router.message(Clinic.specialization)
 async def specialization_chosen_incorrectly(message: Message):
@@ -103,17 +112,26 @@ async def specialist_chosen_incorrectly(message: Message):
 
 @router.message(Clinic.date, F.text.in_(date_arr))
 async def date_chosen(message: Message, state: FSMContext):
-    await state.update_data(chosen_date=message.text.lower())
-    user_data = await state.get_data()
-    busy_time_arr = db.get_time_date(user_data['chosen_date'])
-    '''Получение  свободного времени'''
-    free_time_arr = [x for x in time_arr if x not in busy_time_arr]
-    '''Проверка если свободного времени нет'''
-    if free_time_arr == []:
-        await message.answer(text="На эту дату нет сводного времени\nПожалуйста, выберите свободную дату", reply_markup=make_row_keyboard(date_arr))
-    else:
-        await message.answer(text="Хорошо. Выберете свободное время.", reply_markup=make_row_keyboard(free_time_arr))
-        await state.set_state(Clinic.time)
+    try:
+        await state.update_data(chosen_date=message.text.lower())
+        user_data = await state.get_data()
+        busy_time_arr = db.get_time_date(user_data['chosen_date'])
+        '''Получение  свободного времени'''
+        free_time_arr = [x for x in time_arr if x not in busy_time_arr]
+        '''Проверка если свободного времени нет'''
+        if free_time_arr == []:
+            await message.answer(text="На эту дату нет сводного времени\nПожалуйста, выберите свободную дату", reply_markup=make_row_keyboard(date_arr))
+        else:
+            await message.answer(text="Хорошо. Выберете свободное время.", reply_markup=make_row_keyboard(free_time_arr))
+            await state.set_state(Clinic.time)
+    except:
+        await state.clear()
+        await message.answer(text="Произошла ошибка", reply_markup=ReplyKeyboardRemove())
+        await message.answer(
+            text="Здравствуйте! Вас приветствует клиника AmNyam\n"
+                "Вы можете выбрать одно из действий, представленных ниже",
+            reply_markup=start_row_keyboard()
+        )
 
 @router.message(Clinic.date)
 async def date_chosen_incorrectly(message: Message):
@@ -121,27 +139,36 @@ async def date_chosen_incorrectly(message: Message):
 
 @router.message(Clinic.time, F.text.in_(time_arr))
 async def time_chosen(message: Message, state: FSMContext):
-    await state.update_data(chosen_time=message.text.lower())
-    if db.user_exists(message.from_user.id) == False:
-       '''Проверка на наличие пользователя в базе данных'''
-       await message.answer(text="Хорошо. Введите ФИО полностью.", reply_markup=ReplyKeyboardRemove())
-       await state.set_state(Clinic.user_fio)
-    else:
-        user_data = await state.get_data()
-        '''Получение данных о пользователе из базы данных'''
-        date_user = db.get_user(message.from_user.id)
-        await message.answer(
-            text=f"Специализация: {user_data['chosen_specialization']}\n"
-                f"Специалист: {user_data['chosen_specialist']}\n"
-                f"Дата: {user_data['chosen_date']}\n"
-                f"Время: {user_data['chosen_time']}\n"
-                f"Данные пользователя:\n"
-                f"ФИО: {date_user[0]}\n"
-                f"СНИЛС: {date_user[1]}\n"
-                f"Полис: {date_user[2]}\n", reply_markup=ReplyKeyboardRemove()
-        )
-        db.add_appoint(user_data['chosen_specialist'], message.from_user.id, user_data['chosen_date'], user_data['chosen_time'])
+    try:
+        await state.update_data(chosen_time=message.text.lower())
+        if db.user_exists(message.from_user.id) == False:
+            '''Проверка на наличие пользователя в базе данных'''
+            await message.answer(text="Хорошо. Введите ФИО полностью.", reply_markup=ReplyKeyboardRemove())
+            await state.set_state(Clinic.user_fio)
+        else:
+            user_data = await state.get_data()
+            '''Получение данных о пользователе из базы данных'''
+            date_user = db.get_user(message.from_user.id)
+            await message.answer(
+                text=f"Специализация: {user_data['chosen_specialization']}\n"
+                    f"Специалист: {user_data['chosen_specialist']}\n"
+                    f"Дата: {user_data['chosen_date']}\n"
+                    f"Время: {user_data['chosen_time']}\n"
+                    f"Данные пользователя:\n"
+                    f"ФИО: {date_user[0]}\n"
+                    f"СНИЛС: {date_user[1]}\n"
+                    f"Полис: {date_user[2]}\n", reply_markup=ReplyKeyboardRemove()
+            )
+            db.add_appoint(user_data['chosen_specialist'], message.from_user.id, user_data['chosen_date'], user_data['chosen_time'])
+            await state.clear()
+            await message.answer(
+                text="Здравствуйте! Вас приветствует клиника AmNyam\n"
+                    "Вы можете выбрать одно из действий, представленных ниже",
+                reply_markup=start_row_keyboard()
+            )
+    except:
         await state.clear()
+        await message.answer(text="Произошла ошибка", reply_markup=ReplyKeyboardRemove())
         await message.answer(
             text="Здравствуйте! Вас приветствует клиника AmNyam\n"
                 "Вы можете выбрать одно из действий, представленных ниже",
@@ -166,45 +193,63 @@ async def snils_chosen(message: Message, state: FSMContext):
 
 @router.message(Clinic.user_polis)
 async def polis_chosen(message: Message, state: FSMContext):
-    await state.update_data(chosen_polis=message.text.lower())
-    user_data = await state.get_data()
-    print(user_data['chosen_specialist'])
-    await message.answer(
-        text=f"Специализация: {user_data['chosen_specialization']}\n"
-            f"Специалист: {user_data['chosen_specialist']}\n"
-            f"Дата: {user_data['chosen_date']}\n"
-            f"Время: {user_data['chosen_time']}\n"
-            f"Данные пользователя:\n"
-            f"ФИО: {user_data['chosen_fio']}\n"
-            f"СНИЛС: {user_data['chosen_snils']}\n"
-            f"Полис: {user_data['chosen_polis']}\n"
-    )
-    db.add_appoint(user_data['chosen_specialist'], message.from_user.id, user_data['chosen_date'], user_data['chosen_time'])
-    db.add_user(message.from_user.id, user_data['chosen_fio'], user_data['chosen_snils'], user_data['chosen_polis'])
-    await state.clear()
-    await message.answer(
-        text="Здравствуйте! Вас приветствует клиника AmNyam\n"
-            "Вы можете выбрать одно из действий, представленных ниже",
-        reply_markup=start_row_keyboard()
-    )
+    try:
+        await state.update_data(chosen_polis=message.text.lower())
+        user_data = await state.get_data()
+        print(user_data['chosen_specialist'])
+        await message.answer(
+            text=f"Специализация: {user_data['chosen_specialization']}\n"
+                f"Специалист: {user_data['chosen_specialist']}\n"
+                f"Дата: {user_data['chosen_date']}\n"
+                f"Время: {user_data['chosen_time']}\n"
+                f"Данные пользователя:\n"
+                f"ФИО: {user_data['chosen_fio']}\n"
+                f"СНИЛС: {user_data['chosen_snils']}\n"
+                f"Полис: {user_data['chosen_polis']}\n"
+        )
+        db.add_appoint(user_data['chosen_specialist'], message.from_user.id, user_data['chosen_date'], user_data['chosen_time'])
+        db.add_user(message.from_user.id, user_data['chosen_fio'], user_data['chosen_snils'], user_data['chosen_polis'])
+        await state.clear()
+        await message.answer(
+            text="Здравствуйте! Вас приветствует клиника AmNyam\n"
+                "Вы можете выбрать одно из действий, представленных ниже",
+            reply_markup=start_row_keyboard()
+        )
+    except:
+        await state.clear()
+        await message.answer(text="Произошла ошибка", reply_markup=ReplyKeyboardRemove())
+        await message.answer(
+            text="Здравствуйте! Вас приветствует клиника AmNyam\n"
+                "Вы можете выбрать одно из действий, представленных ниже",
+            reply_markup=start_row_keyboard()
+        )
 
 
 
 
 @router.callback_query(F.data == "my_notes")
 async def start_appointment(callback: CallbackQuery):
-    notes_user = db.get_all_appoints_user(callback.from_user.id)
-    for i in range(len(notes_user)):
-        notes_user_arr = [str(x) for x in notes_user[i]]
-        notes_user_join = '\n'.join(notes_user_arr)
-        await callback.message.answer(notes_user_join)
-    buttons = [
-        [InlineKeyboardButton(text="Запись на приём", callback_data="appointment")],
-        [InlineKeyboardButton(text="Удалить запись", callback_data="del_appointment")]
-    ]
-    keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
-    await callback.message.answer(text="Вы можете сделать одно из следующих действий", reply_markup=keyboard)
-    await callback.answer()
+    try:
+        notes_user = db.get_all_appoints_user(callback.from_user.id)
+        for i in range(len(notes_user)):
+            notes_user_arr = [str(x) for x in notes_user[i]]
+            notes_user_join = '\n'.join(notes_user_arr)
+            await callback.message.answer(notes_user_join)
+        buttons = [
+            [InlineKeyboardButton(text="Запись на приём", callback_data="appointment")],
+            [InlineKeyboardButton(text="Удалить запись", callback_data="del_appointment")]
+        ]
+        keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+        await callback.message.answer(text="Вы можете сделать одно из следующих действий", reply_markup=keyboard)
+        await callback.answer()
+    except:
+        await callback.message.answer(text="Произошла ошибка", reply_markup=ReplyKeyboardRemove())
+        await callback.message.answer(
+            text="Здравствуйте! Вас приветствует клиника AmNyam\n"
+                "Вы можете выбрать одно из действий, представленных ниже",
+            reply_markup=start_row_keyboard()
+        )
+        await callback.answer()
 
 @router.callback_query(F.data == "del_appointment")
 async def cmd_del_appointment(callback: CallbackQuery):
@@ -234,34 +279,52 @@ async def start_symptoms(callback: CallbackQuery, state: FSMContext):
 
 @router.message(Clinic.input_symptoms)
 async def symptoms_chosen(message: Message, state: FSMContext):
-    await state.update_data(chosen_symptoms=message.text.lower())
-    symptoms_data = await state.get_data()
-    symptoms = symptoms_data['chosen_symptoms']
-    symptoms_split = str(symptoms).split()
-    exist_sympton = db.select_symptom()
-    symptom_finden = []
-    id_finden = []
-    specialist_finden = []
-    for i in symptoms_split:
-        i_srez = i[0:-1]
-        if i_srez in exist_sympton:
-            symptom_finden.append(i_srez)
-            id_find = db.select_id(i_srez)
-            id_finden.append(id_find[0])
-    for i in id_finden:
-        specialist_for_symptom = db.find_specialist_for_symptom(int(i))
-        specialist_finden.append(specialist_for_symptom[0])
-    await message.answer(text="По вашим симптомам найдены следующие специальности врачей\nВыберите, к кому записаться", reply_markup=make_row_keyboard(specialist_finden))
-    await state.set_state(Clinic.input_specialization)
+    try:
+        await state.update_data(chosen_symptoms=message.text.lower())
+        symptoms_data = await state.get_data()
+        symptoms = symptoms_data['chosen_symptoms']
+        symptoms_split = str(symptoms).split()
+        exist_sympton = db.select_symptom()
+        symptom_finden = []
+        id_finden = []
+        specialist_finden = []
+        for i in symptoms_split:
+            i_srez = i[0:-1]
+            if i_srez in exist_sympton:
+                symptom_finden.append(i_srez)
+                id_find = db.select_id(i_srez)
+                id_finden.append(id_find[0])
+        for i in id_finden:
+            specialist_for_symptom = db.find_specialist_for_symptom(int(i))
+            specialist_finden.append(specialist_for_symptom[0])
+        await message.answer(text="По вашим симптомам найдены следующие специальности врачей\nВыберите, к кому записаться", reply_markup=make_row_keyboard(specialist_finden))
+        await state.set_state(Clinic.input_specialization)
+    except:
+        await state.clear()
+        await message.answer(text="Произошла ошибка", reply_markup=ReplyKeyboardRemove())
+        await message.answer(
+            text="Здравствуйте! Вас приветствует клиника AmNyam\n"
+                "Вы можете выбрать одно из действий, представленных ниже",
+            reply_markup=start_row_keyboard()
+        )
 
 @router.message(Clinic.input_specialization, F.text.in_(specialization_arr))
 async def specialization_chosen(message: Message, state: FSMContext):
-    await state.update_data(chosen_specialization=message.text.lower())
-    user_data = await state.get_data()
-    global specialist_arr
-    specialist_arr = db.get_all_docs(user_data['chosen_specialization'])
-    await message.answer(text="Хорошо. Выберете конкретного врача.", reply_markup=make_row_keyboard(specialist_arr))
-    await state.set_state(Clinic.input_specialist)
+    try:
+        await state.update_data(chosen_specialization=message.text.lower())
+        user_data = await state.get_data()
+        global specialist_arr
+        specialist_arr = db.get_all_docs(user_data['chosen_specialization'])
+        await message.answer(text="Хорошо. Выберете конкретного врача.", reply_markup=make_row_keyboard(specialist_arr))
+        await state.set_state(Clinic.input_specialist)
+    except:
+        await state.clear()
+        await message.answer(text="Произошла ошибка", reply_markup=ReplyKeyboardRemove())
+        await message.answer(
+            text="Здравствуйте! Вас приветствует клиника AmNyam\n"
+                "Вы можете выбрать одно из действий, представленных ниже",
+            reply_markup=start_row_keyboard()
+        )
 
 @router.message(Clinic.input_specialization)
 async def specialization_chosen_incorrectly(message: Message):
@@ -279,17 +342,26 @@ async def specialist_chosen_incorrectly(message: Message):
 
 @router.message(Clinic.input_date, F.text.in_(date_arr))
 async def date_chosen(message: Message, state: FSMContext):
-    await state.update_data(chosen_date=message.text.lower())
-    user_data = await state.get_data()
-    busy_time_arr = db.get_time_date(user_data['chosen_date'])
-    '''Получение  свободного времени'''
-    free_time_arr = [x for x in time_arr if x not in busy_time_arr]
-    '''Проверка если свободного времени нет'''
-    if free_time_arr == []:
-        await message.answer(text="На эту дату нет сводного времени\nПожалуйста, выберите свободную дату", reply_markup=make_row_keyboard(date_arr))
-    else:
-        await message.answer(text="Хорошо. Выберете свободное время.", reply_markup=make_row_keyboard(free_time_arr))
-        await state.set_state(Clinic.input_time)
+    try:
+        await state.update_data(chosen_date=message.text.lower())
+        user_data = await state.get_data()
+        busy_time_arr = db.get_time_date(user_data['chosen_date'])
+        '''Получение  свободного времени'''
+        free_time_arr = [x for x in time_arr if x not in busy_time_arr]
+        '''Проверка если свободного времени нет'''
+        if free_time_arr == []:
+            await message.answer(text="На эту дату нет сводного времени\nПожалуйста, выберите свободную дату", reply_markup=make_row_keyboard(date_arr))
+        else:
+            await message.answer(text="Хорошо. Выберете свободное время.", reply_markup=make_row_keyboard(free_time_arr))
+            await state.set_state(Clinic.input_time)
+    except:
+        await state.clear()
+        await message.answer(text="Произошла ошибка", reply_markup=ReplyKeyboardRemove())
+        await message.answer(
+            text="Здравствуйте! Вас приветствует клиника AmNyam\n"
+                "Вы можете выбрать одно из действий, представленных ниже",
+            reply_markup=start_row_keyboard()
+        )
 
 @router.message(Clinic.input_date)
 async def date_chosen_incorrectly(message: Message):
@@ -297,25 +369,34 @@ async def date_chosen_incorrectly(message: Message):
 
 @router.message(Clinic.input_time, F.text.in_(time_arr))
 async def time_chosen(message: Message, state: FSMContext):
-    await state.update_data(chosen_time=message.text.lower())
-    if db.user_exists(message.from_user.id) == False:
-       '''Проверка на наличие пользователя в базе данных'''
-       await message.answer(text="Хорошо. Введите ФИО полностью.", reply_markup=ReplyKeyboardRemove())
-       await state.set_state(Clinic.user_fio)
-    else:
-        user_data = await state.get_data()
-        '''Получение данных о пользователе из базы данных'''
-        date_user = db.get_user(message.from_user.id)
-        await message.answer(
-        text=f"Специализация: {user_data['chosen_specialization']}\n"
-            f"Специалист: {user_data['chosen_specialist']}\n"
-            f"Дата: {user_data['chosen_date']}\n"
-            f"Время: {user_data['chosen_time']}\n"
-            f"Данные пользователя:\n"
-            f"ФИО: {date_user[0]}\n"
-            f"СНИЛС: {date_user[1]}\n"
-            f"Полис: {date_user[2]}\n", reply_markup=ReplyKeyboardRemove())
+    try:
+        await state.update_data(chosen_time=message.text.lower())
+        if db.user_exists(message.from_user.id) == False:
+            '''Проверка на наличие пользователя в базе данных'''
+            await message.answer(text="Хорошо. Введите ФИО полностью.", reply_markup=ReplyKeyboardRemove())
+            await state.set_state(Clinic.user_fio)
+        else:
+            user_data = await state.get_data()
+            '''Получение данных о пользователе из базы данных'''
+            date_user = db.get_user(message.from_user.id)
+            await message.answer(
+            text=f"Специализация: {user_data['chosen_specialization']}\n"
+                f"Специалист: {user_data['chosen_specialist']}\n"
+                f"Дата: {user_data['chosen_date']}\n"
+                f"Время: {user_data['chosen_time']}\n"
+                f"Данные пользователя:\n"
+                f"ФИО: {date_user[0]}\n"
+                f"СНИЛС: {date_user[1]}\n"
+                f"Полис: {date_user[2]}\n", reply_markup=ReplyKeyboardRemove())
+            await state.clear()
+            await message.answer(
+                text="Здравствуйте! Вас приветствует клиника AmNyam\n"
+                    "Вы можете выбрать одно из действий, представленных ниже",
+                reply_markup=start_row_keyboard()
+            )
+    except:
         await state.clear()
+        await message.answer(text="Произошла ошибка", reply_markup=ReplyKeyboardRemove())
         await message.answer(
             text="Здравствуйте! Вас приветствует клиника AmNyam\n"
                 "Вы можете выбрать одно из действий, представленных ниже",
@@ -340,27 +421,36 @@ async def snils_chosen(message: Message, state: FSMContext):
 
 @router.message(Clinic.input_user_polis)
 async def polis_chosen(message: Message, state: FSMContext):
-    await state.update_data(chosen_polis=message.text.lower())
-    user_data = await state.get_data()
-    print(user_data['chosen_specialist'])
-    await message.answer(
-        text=f"Специализация: {user_data['chosen_specialization']}\n"
-            f"Специалист: {user_data['chosen_specialist']}\n"
-            f"Дата: {user_data['chosen_date']}\n"
-            f"Время: {user_data['chosen_time']}\n"
-            f"Данные пользователя:\n"
-            f"ФИО: {user_data['chosen_fio']}\n"
-            f"СНИЛС: {user_data['chosen_snils']}\n"
-            f"Полис: {user_data['chosen_polis']}\n"
-    )
-    db.add_appoint(user_data['chosen_specialist'], message.from_user.id, user_data['chosen_date'], user_data['chosen_time'])
-    db.add_user(message.from_user.id, user_data['chosen_fio'], user_data['chosen_snils'], user_data['chosen_polis'])
-    await state.clear()
-    await message.answer(
-        text="Здравствуйте! Вас приветствует клиника AmNyam\n"
-            "Вы можете выбрать одно из действий, представленных ниже",
-        reply_markup=start_row_keyboard()
-    )
+    try:
+        await state.update_data(chosen_polis=message.text.lower())
+        user_data = await state.get_data()
+        print(user_data['chosen_specialist'])
+        await message.answer(
+            text=f"Специализация: {user_data['chosen_specialization']}\n"
+                f"Специалист: {user_data['chosen_specialist']}\n"
+                f"Дата: {user_data['chosen_date']}\n"
+                f"Время: {user_data['chosen_time']}\n"
+                f"Данные пользователя:\n"
+                f"ФИО: {user_data['chosen_fio']}\n"
+                f"СНИЛС: {user_data['chosen_snils']}\n"
+                f"Полис: {user_data['chosen_polis']}\n"
+        )
+        db.add_appoint(user_data['chosen_specialist'], message.from_user.id, user_data['chosen_date'], user_data['chosen_time'])
+        db.add_user(message.from_user.id, user_data['chosen_fio'], user_data['chosen_snils'], user_data['chosen_polis'])
+        await state.clear()
+        await message.answer(
+            text="Здравствуйте! Вас приветствует клиника AmNyam\n"
+                "Вы можете выбрать одно из действий, представленных ниже",
+            reply_markup=start_row_keyboard()
+        )
+    except:
+        await state.clear()
+        await message.answer(text="Произошла ошибка", reply_markup=ReplyKeyboardRemove())
+        await message.answer(
+            text="Здравствуйте! Вас приветствует клиника AmNyam\n"
+                "Вы можете выбрать одно из действий, представленных ниже",
+            reply_markup=start_row_keyboard()
+        )
 
 
 
