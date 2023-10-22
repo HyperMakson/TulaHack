@@ -1,6 +1,6 @@
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram.filters.command import Command
-from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, ReplyKeyboardRemove
+from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, ReplyKeyboardRemove, FSInputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
@@ -9,6 +9,7 @@ from keyboards.start_keyboard import start_row_keyboard
 from db_connect import dbworker
 import pandas as pd
 from datetime import datetime
+from aiogram.methods.send_document import SendDocument
 '''Подключение к базе данных'''
 
 db = dbworker('baza.db')
@@ -311,11 +312,14 @@ async def del_from_db(message: Message, state: FSMContext):
 
 
 @router.callback_query(F.data == "my_tests")
-async def start_appointment(callback: CallbackQuery):
+async def start_appointment(callback: CallbackQuery, bot:Bot):
     tests = db.get_file(callback.from_user.id)
-    print(tests)
+    await callback.message.answer(text='Вот ваши анализы')
     for test in tests:
-        await callback.message.answer(text=test[0])
+        print(test)
+        file = FSInputFile(test, filename="Analiz.pdf")
+        await callback.message.answer_document(file)
+        
         
     await callback.answer()
 
