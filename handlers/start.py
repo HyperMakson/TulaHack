@@ -313,10 +313,11 @@ async def del_from_db(message: Message, state: FSMContext):
 @router.callback_query(F.data == "my_tests")
 async def start_appointment(callback: CallbackQuery):
     tests = db.get_file(callback.from_user.id)
+    print(tests)
     for test in tests:
-        f = open(test[0],'r')
-        await callback.message.answer(f)
-        await callback.answer()
+        await callback.message.answer(text=test[0])
+        
+    await callback.answer()
 
 
 
