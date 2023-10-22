@@ -314,6 +314,7 @@ async def del_from_db(message: Message, state: FSMContext):
 async def start_appointment(callback: CallbackQuery):
     tests = db.get_file(callback.from_user.id)
     for test in tests:
+        open('example.txt','r')
         await callback.message.answer("Это мои анализы")
         await callback.answer()
 
